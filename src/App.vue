@@ -133,8 +133,8 @@ watch(
       required
     />
     <button class="submit">
-      <i class="fa-brands fa-searchengin"></i>Search
-    </button>
+  <i class="fa-brands fa-searchengin" ></i>Search
+</button>
   </form>
   <div class="main-container">
     <div class="container-1">
@@ -188,6 +188,10 @@ watch(
   color: black;
   border: 1px solid black;
   box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.356);
+}
+
+.submit i {
+  margin-right: 8px;
 }
 
 .form {
