@@ -33,7 +33,7 @@ async function fetchWhoisData(domain) {
 
     console.log(apiUrl);
     // Format result as needed
-    searchResult.value =
+     searchResult.value =
       data.WhoisRecord && !data.WhoisRecord.dataError
         ? `
         Domain Name: ${data.WhoisRecord.domainName} <br />  <br />
@@ -75,7 +75,18 @@ function searchFromHistory(domain) {
   fetchWhoisData(domain);
 }
 
-//limit historyto 10 item
+//limit history to 10 item in history
+
+watch(
+  history,
+  (newValue) => {
+    if (newValue.length > 10) {
+      history.value = newValue.slice(0, 10);
+    }
+    localStorage.setItem(localStorageKey, JSON.stringify(history.value));
+  },
+  { deep: true }
+);
 
 // Saves the current search history to localStorage.
 
