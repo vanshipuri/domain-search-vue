@@ -75,6 +75,8 @@ function searchFromHistory(domain) {
   fetchWhoisData(domain);
 }
 
+//limit historyto 10 item
+
 // Saves the current search history to localStorage.
 
 /**
