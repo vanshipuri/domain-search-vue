@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 
+const searchError = ref(null);
+const isLoading = ref(false);
 const domainName = ref("");
 const searchResult = ref(null);
 const history = ref([]);
@@ -24,7 +26,8 @@ watch(
 );
 
 async function fetchWhoisData(domain) {
-  searchResult.value = 'Loading... <i class="fa-solid fa-spinner"></i>';
+  isLoading.value = true;
+  searchError.value = null;
   try {
     const apikey = import.meta.env.VITE_API_KEY;
     const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apikey}&domainName=${domain}&outputFormat=json`;
@@ -33,24 +36,16 @@ async function fetchWhoisData(domain) {
 
     console.log(apiUrl);
     // Format result as needed
-     searchResult.value =
-      data.WhoisRecord && !data.WhoisRecord.dataError
-        ? `
-        Domain Name: ${data.WhoisRecord.domainName} <br />  <br />
-        Domain Name Server: ${
-          data.WhoisRecord.nameServers?.hostNames?.join(", ") || "N/A"
-        } <br /> <br />
-        Domain Registered On: ${
-          data.WhoisRecord.audit.createdDate || "N/A"
-        } <br /> <br />
-        Domain Expires On: ${data.WhoisRecord.expiresDate || "N/A"} <br/> <br />
-        Domain Updated On: ${data.WhoisRecord.updatedDate || "N/A"} <br/> <br />
-        Domain Error: ${data.WhoisRecord.dataError || "N/A"}
-      `
-        : "This Domain is not registered";
+    if (data.ErrorMessage) {
+      searchError.value = data.ErrorMessage.msg;
+      return;
+    }
+    searchResult.value = data;
   } catch (error) {
     console.error(error);
-    searchResult.value = "Error fetching data.";
+    searchError.value = "Error fetching data.";
+  } finally {
+    isLoading.value = false;
   }
 }
 
@@ -123,7 +118,8 @@ watch(
 
 <template>
   <h1 class="text-5xl font-bold">Domain Search Application</h1>
-  <br/> <br/>
+  <br />
+  <br />
   <form @submit.prevent="handleSearchKeyPress">
     <input
       type="text"
@@ -134,27 +130,65 @@ watch(
       required
     />
     <button class="submit">
-  <i class="fa-brands fa-searchengin" ></i>Search
-</button>
+      <i class="fa-brands fa-searchengin"></i>Search
+    </button>
   </form>
   <div class="main-container">
     <div class="container-1">
       <h3>Search Results</h3>
       <div class="Search-Results">
-        <div >
-          <div v-if="searchResult" v-html="searchResult"></div>
-    <div v-else>
-      <p>
-        Eg:- Name: ABC.COM<br />
-        Domain Name: ABC.COM<br />
-        Domain Name Server: ns1.abc.com<br />
-        Domain Registered On: 1996-05-22T04:00:00Z <br />
-        Domain Expires On: 2026-05-23T04:00:00Z <br />
-      </p>
-    </div>
-  </div>
-</div>
+        <div>
+          <div v-if="isLoading">
+            <span class="fa-solid fa-spinner"></span>
+          </div>
+          <div v-else-if="searchError" style="color:red">{{ searchError }}</div>
+          <div v-else-if="searchResult?.WhoisRecord.dataError">
+            <!-- todo:: show error message according to error code -->
+            This domain is not registered.
+          </div>
+          <div v-else-if="searchResult">
+            <span>
+              <span>Domain Name:</span>
+              <span>{{ searchResult.WhoisRecord.domainName }}</span>
+            </span>
+            <span>
+              <span> Domain Name Server:</span>
+              <span>{{
+                searchResult.WhoisRecord.nameServers?.hostNames?.join(", ") ||
+                "N/A"
+              }}</span>
+            </span>
+            <span>
+              <span> Domain Registered On:</span>
+              <span>{{
+                searchResult.WhoisRecord.audit.createdDate || "N/A"
+              }}</span>
+            </span>
+            <span>
+              <span>Domain Expires On:</span>
+              <span> {{ searchResult.WhoisRecord.expiresDate || "N/A" }}</span>
+            </span>
+            <span>
+              <span> Domain Updated On: </span>
+              <span> {{ searchResult.WhoisRecord.updatedDate || "N/A" }}</span>
+            </span>
+            <span>
+              <span> Domain Error: </span>
+              <span> {{ searchResult.WhoisRecord.dataError || "N/A" }}</span>
+            </span>
+          </div>
+          <div v-else>
+            <p>
+              Eg:- Name: ABC.COM<br />
+              Domain Name: ABC.COM<br />
+              Domain Name Server: ns1.abc.com<br />
+              Domain Registered On: 1996-05-22T04:00:00Z <br />
+              Domain Expires On: 2026-05-23T04:00:00Z <br />
+            </p>
+          </div>
         </div>
+      </div>
+    </div>
     <div class="container-2">
       <h3>Previous Searches</h3>
       <div class="History">
@@ -249,7 +283,7 @@ input[type="text"]:focus {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
 }
 
-.History{
-  cursor:pointer;
+.History {
+  cursor: pointer;
 }
 </style>
