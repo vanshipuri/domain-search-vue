@@ -24,7 +24,7 @@ watch(
 );
 
 async function fetchWhoisData(domain) {
-  searchResult.value = "Loading...";
+  searchResult.value = 'Loading... <i class="fa-solid fa-spinner"></i>';
   try {
     const apikey = import.meta.env.VITE_API_KEY;
     const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apikey}&domainName=${domain}&outputFormat=json`;
@@ -122,7 +122,8 @@ watch(
 </script>
 
 <template>
-  <h1>Domain Search Application</h1>
+  <h1 class="text-5xl font-bold">Domain Search Application</h1>
+  <br/> <br/>
   <form @submit.prevent="handleSearchKeyPress">
     <input
       type="text"
@@ -139,18 +140,21 @@ watch(
   <div class="main-container">
     <div class="container-1">
       <h3>Search Results</h3>
-      <div
-        class="Search-Results"
-        v-html="
-          searchResult ||
-          `Eg:-Name: ABC.COM<br />
-                Domain Name: ABC.COM<br />
-                Domain Name Server: ns1.abc.com<br />
-                Domain Registered On: 1996-05-22T04:00:00Z <br />
-                Domain Expires On: 2026-05-23T04:00:00Z <br />`
-        "
-      ></div>
+      <div class="Search-Results">
+        <div >
+          <div v-if="searchResult" v-html="searchResult"></div>
+    <div v-else>
+      <p>
+        Eg:- Name: ABC.COM<br />
+        Domain Name: ABC.COM<br />
+        Domain Name Server: ns1.abc.com<br />
+        Domain Registered On: 1996-05-22T04:00:00Z <br />
+        Domain Expires On: 2026-05-23T04:00:00Z <br />
+      </p>
     </div>
+  </div>
+</div>
+        </div>
     <div class="container-2">
       <h3>Previous Searches</h3>
       <div class="History">
