@@ -228,7 +228,6 @@ input[type="text"]:focus {
   border-radius: 8px;
 }
 .container-1:hover {
-  cursor: pointer;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
 }
 .container-2 {
@@ -239,7 +238,10 @@ input[type="text"]:focus {
 }
 
 .container-2:hover {
-  cursor: pointer;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
+}
+
+.History{
+  cursor:pointer;
 }
 </style>
