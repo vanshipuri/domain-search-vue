@@ -1,12 +1,12 @@
 <script setup>
-import { ref , onMounted , watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 
 const domainName = ref("");
 const searchResult = ref(null);
 const history = ref([]);
-const localStorageKey = 'history';
+const localStorageKey = "history";
 
-//load data from local storage on component mount 
+//load data from local storage on component mount
 onMounted(() => {
   const storedHistory = localStorage.getItem(localStorageKey);
   if (storedHistory) {
@@ -15,10 +15,13 @@ onMounted(() => {
 });
 
 //watch for changes in history and save to local storage
-watch(history, (newValue) => {
-  localStorage.setItem(localStorageKey, JSON.stringify(newValue));
-}, { deep: true });
-
+watch(
+  history,
+  (newValue) => {
+    localStorage.setItem(localStorageKey, JSON.stringify(newValue));
+  },
+  { deep: true }
+);
 
 async function fetchWhoisData(domain) {
   searchResult.value = "Loading...";
@@ -30,18 +33,21 @@ async function fetchWhoisData(domain) {
 
     console.log(apiUrl);
     // Format result as needed
-    searchResult.value = data.WhoisRecord && data.WhoisRecord.dataError
-      ? `
+    searchResult.value =
+      data.WhoisRecord && !data.WhoisRecord.dataError
+        ? `
         Domain Name: ${data.WhoisRecord.domainName} <br />  <br />
         Domain Name Server: ${
           data.WhoisRecord.nameServers?.hostNames?.join(", ") || "N/A"
         } <br /> <br />
-        Domain Registered On: ${data.WhoisRecord.audit.createdDate || "N/A"} <br /> <br />
+        Domain Registered On: ${
+          data.WhoisRecord.audit.createdDate || "N/A"
+        } <br /> <br />
         Domain Expires On: ${data.WhoisRecord.expiresDate || "N/A"} <br/> <br />
         Domain Updated On: ${data.WhoisRecord.updatedDate || "N/A"} <br/> <br />
         Domain Error: ${data.WhoisRecord.dataError || "N/A"}
       `
-      : "This Domain is not registered";
+        : "This Domain is not registered";
   } catch (error) {
     console.error(error);
     searchResult.value = "Error fetching data.";
@@ -63,22 +69,18 @@ function handleSearchKeyPress(event) {
   }
 }
 
-
 // link history to domain search
 function searchFromHistory(domain) {
   domainName.value = domain;
   fetchWhoisData(domain);
 }
 
-
-
- // Saves the current search history to localStorage.
+// Saves the current search history to localStorage.
 
 /**
  *function saveHistoryToLocalStorage() {
   localStorage.setItem("History", JSON.stringify(history.value));
 }*/
-
 
 // Loads search history from localStorage.
 
@@ -92,8 +94,6 @@ function searchFromHistory(domain) {
   }
 }*/
 
-
-
 //function fetchWhoisData(domainName) {
 //const searchResults = document.getElementById("Search-Results");
 //searchResults.innerHTML = `<span>Loading...</span>`;
@@ -106,9 +106,6 @@ function searchFromHistory(domain) {
 //const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apikey}&domainName=${domainInput}&outputFormat=json`;
 
 //const apikey = import.meta.env.VITE_API_KEY;
-
-
-
 </script>
 
 <template>
@@ -145,7 +142,10 @@ function searchFromHistory(domain) {
       <h3>Previous Searches</h3>
       <div class="History">
         <span v-for="(item, index) in history" :key="index"
-          ><a href="#" @click.prevent="searchFromHistory(item)"><p>{{ item }}</p></a></span>
+          ><a href="#" @click.prevent="searchFromHistory(item)"
+            ><p>{{ item }}</p></a
+          ></span
+        >
       </div>
     </div>
   </div>
