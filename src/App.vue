@@ -149,44 +149,49 @@ watch(
           </div>
           <div v-else-if="searchResult">
             <span>
-              <span>Domain Name:</span>
+              <span style="color: #33383a;"><b>Domain Name:</b></span>
               <br/>
-              <span><b>{{ searchResult.WhoisRecord.domainName }}</b></span>
+              <span style="font-size: 20px;">{{ searchResult?.WhoisRecord?.domainName || "N/A" }}</span>
             </span>
             <br/>
             <br/>
             <span>
-              <span> Domain Name Server:</span>
+              <span style="color: #33383a;"><b> Domain Name Server:</b></span>
+              <br/>
               <span><i>{{
-                searchResult.WhoisRecord.nameServers?.hostNames?.join(", ") ||
+                searchResult?.WhoisRecord?.nameServers?.hostNames?.join(", ") ||
                 "N/A"
               }}</i></span>
             </span>
             <br/>
             <br/>
             <span>
-              <span> Domain Registered On:</span>
+              <span style="color: #33383a;"><b>Domain Registered On:</b> </span>
+              <br/>
               <span>{{
-                searchResult.WhoisRecord.audit.createdDate || "N/A"
+                searchResult?.WhoisRecord?.audit?.createdDate || "N/A"
               }}</span>
             </span>
             <br/>
             <br/>
             <span>
-              <span>Domain Expires On:</span>
-              <span> {{ searchResult.WhoisRecord.expiresDate || "N/A" }}</span>
+              <span style="color: #33383a;"><b>Domain Expires On:</b></span>
+              <br/>
+              <span> {{ searchResult?.WhoisRecord?.expiresDate || "N/A" }}</span>
             </span>
             <br/>
             <br/>
             <span>
-              <span> Domain Updated On: </span>
-              <span> {{ searchResult.WhoisRecord.updatedDate || "N/A" }}</span>
+              <span style="color: #33383a;"><b> Domain Updated On:</b> </span>
+              <br/>
+              <span> {{ searchResult?.WhoisRecord?.updatedDate || "N/A" }}</span>
             </span>
             <br/>
             <br/>
             <span>
-              <span> Domain Error: </span>
-              <span> {{ searchResult.WhoisRecord.dataError || "N/A" }}</span>
+              <span style="color: #33383a;"><b>Domain Error:</b>  </span>
+              <br/>
+              <span> {{ searchResult?.WhoisRecord?.dataError || "N/A" }}</span>
             </span>
           </div>
           <div v-else>
@@ -294,13 +299,14 @@ input[type="text"]:focus {
 .main-container {
   display: flex;
   flex-direction: colomn;
-  justify-content: space-evenly;
+  justify-content: space-between;
   margin-top: 20px;
 }
 .container-1 {
-  width: 50%;
+  width: 60%;
   background-color: #f0f0f0;
   padding: 20px;
+  margin-right: 10px;
   border-radius: 8px;
 }
 .container-1:hover {
