@@ -139,7 +139,8 @@ watch(
       <div class="Search-Results">
         <div>
           <div v-if="isLoading">
-            <span class="fa-solid fa-spinner"></span>
+            <div class="spinnerAnimate">
+            <span class="fa-solid fa-spinner"></span></div>
           </div>
           <div v-else-if="searchError" style="color:red">{{ searchError }}</div>
           <div v-else-if="searchResult?.WhoisRecord.dataError">
@@ -151,6 +152,8 @@ watch(
               <span>Domain Name:</span>
               <span>{{ searchResult.WhoisRecord.domainName }}</span>
             </span>
+            <br/>
+            <br/>
             <span>
               <span> Domain Name Server:</span>
               <span>{{
@@ -158,20 +161,28 @@ watch(
                 "N/A"
               }}</span>
             </span>
+            <br/>
+            <br/>
             <span>
               <span> Domain Registered On:</span>
               <span>{{
                 searchResult.WhoisRecord.audit.createdDate || "N/A"
               }}</span>
             </span>
+            <br/>
+            <br/>
             <span>
               <span>Domain Expires On:</span>
               <span> {{ searchResult.WhoisRecord.expiresDate || "N/A" }}</span>
             </span>
+            <br/>
+            <br/>
             <span>
               <span> Domain Updated On: </span>
               <span> {{ searchResult.WhoisRecord.updatedDate || "N/A" }}</span>
             </span>
+            <br/>
+            <br/>
             <span>
               <span> Domain Error: </span>
               <span> {{ searchResult.WhoisRecord.dataError || "N/A" }}</span>
@@ -203,6 +214,22 @@ watch(
 </template>
 
 <style scoped>
+@keyframes example {
+  0%   {color:rgb(87, 86, 86); left:0px; top:0px;}
+  50%  {color:rgb(51, 51, 51); left:200px; top:0px;}
+  100% {color:rgb(0, 0, 0); left:0px; top:0px;}
+}
+
+
+.spinnerAnimate {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  background-color: #f0f0f0;
+  animation-name: example;
+  animation-duration: 15s;
+}
+
 .h1 {
   text-align: center;
   font-size: 2.5em;
