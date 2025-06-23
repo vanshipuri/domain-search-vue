@@ -140,7 +140,7 @@ watch(
         <div>
           <div v-if="isLoading">
             <div class="spinnerAnimate">
-            <span class="fa-solid fa-spinner"></span></div>
+            </div>
           </div>
           <div v-else-if="searchError" style="color:red">{{ searchError }}</div>
           <div v-else-if="searchResult?.WhoisRecord.dataError">
@@ -150,16 +150,17 @@ watch(
           <div v-else-if="searchResult">
             <span>
               <span>Domain Name:</span>
-              <span>{{ searchResult.WhoisRecord.domainName }}</span>
+              <br/>
+              <span><b>{{ searchResult.WhoisRecord.domainName }}</b></span>
             </span>
             <br/>
             <br/>
             <span>
               <span> Domain Name Server:</span>
-              <span>{{
+              <span><i>{{
                 searchResult.WhoisRecord.nameServers?.hostNames?.join(", ") ||
                 "N/A"
-              }}</span>
+              }}</i></span>
             </span>
             <br/>
             <br/>
@@ -214,21 +215,27 @@ watch(
 </template>
 
 <style scoped>
-@keyframes example {
-  0%   {color:rgb(87, 86, 86); left:0px; top:0px;}
-  50%  {color:rgb(51, 51, 51); left:200px; top:0px;}
-  100% {color:rgb(0, 0, 0); left:0px; top:0px;}
-}
-
-
 .spinnerAnimate {
-  width: 100px;
-  height: 100px;
-  position: relative;
-  background-color: #f0f0f0;
-  animation-name: example;
-  animation-duration: 15s;
+	width: 30px;
+  height: 30px;
+	position: relative;
+	top: 50%;
+	left: 50%;
+	margin-top: -(30/ 2);
+	margin-left: -(30/ 2);
+	border-radius: 50%;
+	border: 5px solid #eaf5fe;
+	border-right-color: #000000;
+	animation: rotateSpinner 800ms linear infinite;
 }
+
+@keyframes rotateSpinner {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+
 
 .h1 {
   text-align: center;
