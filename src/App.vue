@@ -1,8 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 
-import { ContentLoader } from "vue-content-loader";
-
 const searchError = ref(null);
 const isLoading = ref(false);
 const domainName = ref("");
@@ -147,31 +145,57 @@ watch(
             <div class="ph-item">
               <div class="ph-col-12">
                 <div class="ph-row">
-                  <div class="ph-col-6 big"></div>
+                  <div class="ph-col-6"></div>
                   <div class="ph-col-4 empty big"></div>
-                  <div class="ph-col-2 big"></div>
-                  <div class="ph-col-4"></div>
-                  <div class="ph-col-8 empty"></div>
+                  <div class="ph-col-4 empty big" ><b>Domain Name:</b></div>
+                  </br>
                   <div class="ph-col-6"></div>
                   <div class="ph-col-6 empty"></div>
                   <div class="ph-col-12"></div>
+                  <div class="ph-col-4 empty big" style="text-align: left;">
+                    <b>Domain Name Servers:</b>
+                  </div>
+                  </br>
                   <div class="ph-col-6"></div>
                   <div class="ph-col-6 empty"></div>
                   <div class="ph-col-12"></div>
+                  <div class="ph-col-4 empty big" style="text-align: left;">
+                    <b>Domain Registered On:</b>
+                  </div>
+                </br>
+                  <div class="ph-col-6"></div>
                   <div class="ph-col-6 empty"></div>
+                  <div class="ph-col-12"></div>
+                  <div class="ph-col-4 empty big" style="text-align: left;">
+                    <b>Domain Expires On:</b>
+                  </div>
+                  </br>
+                  <div class="ph-col-4 empty big"></div>
+                  <div class="ph-col-6"></div>
+                  <div class="ph-col-6 empty"></div>
+                  <div class="ph-col-4 empty big" style="text-align: left;">
+                    <b>Domain Updated On:</b>
+                  </div>
+                  </br>
                   <div class="ph-col-12"></div>
                   <div class="ph-col-4"></div>
                   <div class="ph-col-8 empty"></div>
-                   <div class="ph-col-4 empty big"></div>
+                  <div class="ph-col-4 empty big" style="text-align: left;">
+                    <b>Domain Error:</b>
+                  </div>
+                  </br>
+                  <div class="ph-col-4 empty big"></div>
+                  <div class="ph-col-12"></div>
+                  <div class="ph-col-6 empty"></div>
+                  <div class="ph-col-12"></div>
                 </div>
               </div>
             </div>
-            <div class="spinnerAnimate"></div>
           </div>
           <div v-else-if="searchError" style="color: red">
             {{ searchError }}
           </div>
-          <div v-else-if="searchResult?.WhoisRecord?.dataError">
+          <div v-else-if="searchResult?.WhoisRecord?.dataError && searchResult?.WhoisRecord?.dataError !== 'MASKED_WHOIS_DATA'">
             <!-- todo:: show error message according to error code -->
             This domain is not registered.
           </div>
@@ -257,28 +281,6 @@ watch(
 </template>
 
 <style scoped>
-.spinnerAnimate {
-  display: block;
-  margin: 0;
-  width: 30px;
-  height: 30px;
-  position: relative;
-  top: 50%;
-  left: 45%;
-  right: 45%;
-  margin-top: -(30/ 2);
-  border-radius: 50%;
-  border: 5px dotted #eaf5fe;
-  border-right-color: #000000;
-  animation: rotateSpinner 800ms linear infinite;
-}
-
-@keyframes rotateSpinner {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .h1 {
   text-align: center;
   font-size: 3.5em;
@@ -338,6 +340,8 @@ input[type="text"]:focus {
   font-size: 1.25em;
 }
 
+
+
 .main-container {
   display: flex;
   flex-direction: colomn;
@@ -346,6 +350,7 @@ input[type="text"]:focus {
   text-align: left;
 }
 .container-1 {
+  text-align: left;
   width: 50%;
   background-color: #f0f0f0;
   padding: 20px;
