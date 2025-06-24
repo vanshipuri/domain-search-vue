@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 
+import { ContentLoader } from "vue-content-loader";
+
 const searchError = ref(null);
 const isLoading = ref(false);
 const domainName = ref("");
@@ -34,7 +36,10 @@ async function fetchWhoisData(domain) {
     const res = await fetch(apiUrl);
     const data = await res.json();
 
+    console.log(data); // <-- Add this line
+
     console.log(apiUrl);
+
     // Format result as needed
     if (data.ErrorMessage) {
       searchError.value = data.ErrorMessage.msg;
@@ -136,61 +141,93 @@ watch(
   <div class="main-container">
     <div class="container-1">
       <h3>Search Results</h3>
-      <div class="Search-Results">
+      <div class="searchResults">
         <div>
           <div v-if="isLoading">
-            <div class="spinnerAnimate">
+            <div class="ph-item">
+              <div class="ph-col-12">
+                <div class="ph-row">
+                  <div class="ph-col-6 big"></div>
+                  <div class="ph-col-4 empty big"></div>
+                  <div class="ph-col-2 big"></div>
+                  <div class="ph-col-4"></div>
+                  <div class="ph-col-8 empty"></div>
+                  <div class="ph-col-6"></div>
+                  <div class="ph-col-6 empty"></div>
+                  <div class="ph-col-12"></div>
+                  <div class="ph-col-6"></div>
+                  <div class="ph-col-6 empty"></div>
+                  <div class="ph-col-12"></div>
+                  <div class="ph-col-6 empty"></div>
+                  <div class="ph-col-12"></div>
+                  <div class="ph-col-4"></div>
+                  <div class="ph-col-8 empty"></div>
+                   <div class="ph-col-4 empty big"></div>
+                </div>
+              </div>
             </div>
+            <div class="spinnerAnimate"></div>
           </div>
-          <div v-else-if="searchError" style="color:red">{{ searchError }}</div>
-          <div v-else-if="searchResult?.WhoisRecord.dataError">
+          <div v-else-if="searchError" style="color: red">
+            {{ searchError }}
+          </div>
+          <div v-else-if="searchResult?.WhoisRecord?.dataError">
             <!-- todo:: show error message according to error code -->
             This domain is not registered.
           </div>
           <div v-else-if="searchResult">
             <span>
-              <span style="color: #33383a;"><b>Domain Name:</b></span>
-              <br/>
-              <span style="font-size: 20px;">{{ searchResult?.WhoisRecord?.domainName || "N/A" }}</span>
+              <span style="color: #33383a"><b>Domain Name:</b></span>
+              <br />
+              <span style="font-size: 20px">{{
+                searchResult?.WhoisRecord?.domainName || "N/A"
+              }}</span>
             </span>
-            <br/>
-            <br/>
+            <br />
+            <br />
             <span>
-              <span style="color: #33383a;"><b> Domain Name Server:</b></span>
-              <br/>
-              <span><i>{{
-                searchResult?.WhoisRecord?.nameServers?.hostNames?.join(", ") ||
-                "N/A"
-              }}</i></span>
+              <span style="color: #33383a"><b> Domain Name Server:</b></span>
+              <br />
+              <span
+                ><i>{{
+                  searchResult?.WhoisRecord?.nameServers?.hostNames?.join(
+                    ", "
+                  ) || "N/A"
+                }}</i></span
+              >
             </span>
-            <br/>
-            <br/>
+            <br />
+            <br />
             <span>
-              <span style="color: #33383a;"><b>Domain Registered On:</b> </span>
-              <br/>
+              <span style="color: #33383a"><b>Domain Registered On:</b> </span>
+              <br />
               <span>{{
                 searchResult?.WhoisRecord?.audit?.createdDate || "N/A"
               }}</span>
             </span>
-            <br/>
-            <br/>
+            <br />
+            <br />
             <span>
-              <span style="color: #33383a;"><b>Domain Expires On:</b></span>
-              <br/>
-              <span> {{ searchResult?.WhoisRecord?.expiresDate || "N/A" }}</span>
+              <span style="color: #33383a"><b>Domain Expires On:</b></span>
+              <br />
+              <span>
+                {{ searchResult?.WhoisRecord?.expiresDate || "N/A" }}</span
+              >
             </span>
-            <br/>
-            <br/>
+            <br />
+            <br />
             <span>
-              <span style="color: #33383a;"><b> Domain Updated On:</b> </span>
-              <br/>
-              <span> {{ searchResult?.WhoisRecord?.updatedDate || "N/A" }}</span>
+              <span style="color: #33383a"><b> Domain Updated On:</b> </span>
+              <br />
+              <span>
+                {{ searchResult?.WhoisRecord?.updatedDate || "N/A" }}</span
+              >
             </span>
-            <br/>
-            <br/>
+            <br />
+            <br />
             <span>
-              <span style="color: #33383a;"><b>Domain Error:</b>  </span>
-              <br/>
+              <span style="color: #33383a"><b>Domain Error:</b> </span>
+              <br />
               <span> {{ searchResult?.WhoisRecord?.dataError || "N/A" }}</span>
             </span>
           </div>
@@ -221,32 +258,36 @@ watch(
 
 <style scoped>
 .spinnerAnimate {
-	width: 30px;
+  display: block;
+  margin: 0;
+  width: 30px;
   height: 30px;
-	position: relative;
-	top: 50%;
-	left: 50%;
-	margin-top: -(30/ 2);
-	margin-left: -(30/ 2);
-	border-radius: 50%;
-	border: 5px solid #eaf5fe;
-	border-right-color: #000000;
-	animation: rotateSpinner 800ms linear infinite;
+  position: relative;
+  top: 50%;
+  left: 45%;
+  right: 45%;
+  margin-top: -(30/ 2);
+  border-radius: 50%;
+  border: 5px dotted #eaf5fe;
+  border-right-color: #000000;
+  animation: rotateSpinner 800ms linear infinite;
 }
 
 @keyframes rotateSpinner {
-	to {
-		transform: rotate(360deg);
-	}
+  to {
+    transform: rotate(360deg);
+  }
 }
-
-
 
 .h1 {
   text-align: center;
-  font-size: 2.5em;
+  font-size: 3.5em;
   color: #333;
   margin-top: 20px;
+}
+
+.h3 {
+  text-align: left;
 }
 
 .submit {
@@ -272,7 +313,8 @@ watch(
 }
 
 .form {
-  display: flex;
+  display: block;
+  margin: auto;
   justify-content: center;
   margin-top: 90px;
   padding: 30px;
@@ -299,11 +341,12 @@ input[type="text"]:focus {
 .main-container {
   display: flex;
   flex-direction: colomn;
-  justify-content: space-between;
+  justify-content: space-evenly;
   margin-top: 20px;
+  text-align: left;
 }
 .container-1 {
-  width: 60%;
+  width: 50%;
   background-color: #f0f0f0;
   padding: 20px;
   margin-right: 10px;
