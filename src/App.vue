@@ -1,5 +1,10 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
+import AppHeader from "./components/AppHeader.vue";
+import Form from "./components/Form.vue";
+import Results from "./components/Results.vue";
+import History from "./components/History.vue";
+import ExpiryTracking from "./components/ExpiryTracking.vue";
 
 const searchError = ref(null);
 const isLoading = ref(false);
@@ -8,7 +13,7 @@ const searchResult = ref(null);
 const history = ref([]);
 const localStorageKey = "history";
 
-//load data from local storage on component mount
+// Load history from localStorage
 onMounted(() => {
   const storedHistory = localStorage.getItem(localStorageKey);
   if (storedHistory) {
@@ -16,7 +21,7 @@ onMounted(() => {
   }
 });
 
-//watch for changes in history and save to local storage
+// Save history to localStorage
 watch(
   history,
   (newValue) => {
@@ -34,19 +39,15 @@ async function fetchWhoisData(domain) {
     const res = await fetch(apiUrl);
     const data = await res.json();
 
-    console.log(data); // <-- Add this line
-
-    console.log(apiUrl);
-
-    // Format result as needed
     if (data.ErrorMessage) {
       searchError.value = data.ErrorMessage.msg;
+      searchResult.value = null;
       return;
     }
     searchResult.value = data;
   } catch (error) {
-    console.error(error);
     searchError.value = "Error fetching data.";
+    searchResult.value = null;
   } finally {
     isLoading.value = false;
   }
@@ -55,237 +56,76 @@ async function fetchWhoisData(domain) {
 function appendSearchToHistory(domain) {
   if (!history.value.includes(domain)) {
     history.value.unshift(domain);
+    if (history.value.length > 10) {
+      history.value = history.value.slice(0, 10);
+    }
   }
 }
 
-function handleSearchKeyPress(event) {
-  event.preventDefault();
-  const domainInput = domainName.value.trim();
-  if (domainInput) {
-    fetchWhoisData(domainInput);
-    appendSearchToHistory(domainInput);
+function handleSearch(domain) {
+  if (domain) {
+    fetchWhoisData(domain);
+    appendSearchToHistory(domain);
   }
 }
 
-// link history to domain search
 function searchFromHistory(domain) {
-  domainName.value = domain;
   fetchWhoisData(domain);
 }
-
-//limit history to 10 item in history
-
-watch(
-  history,
-  (newValue) => {
-    if (newValue.length > 10) {
-      history.value = newValue.slice(0, 10);
-    }
-    localStorage.setItem(localStorageKey, JSON.stringify(history.value));
-  },
-  { deep: true }
-);
-
-// Saves the current search history to localStorage.
-
-/**
- *function saveHistoryToLocalStorage() {
-  localStorage.setItem("History", JSON.stringify(history.value));
-}*/
-
-// Loads search history from localStorage.
-
-/**
- *function loadHistoryFromLocalStorage() {
-  const stored = JSON.parse(localStorage.getItem("History") || "[]");
-  if (stored.length === 0) {
-    history.value = [];
-  } else {
-    history.value = stored;
-  }
-}*/
-
-//function fetchWhoisData(domainName) {
-//const searchResults = document.getElementById("Search-Results");
-//searchResults.innerHTML = `<span>Loading...</span>`;
-//}
-//fetch data from apiUrl
-//const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apikey}&domainName=${domainName}&outputFormat=json`;
-//const apikey =  import.meta.env.VITE_API_KEY;
-
-//get domainName data from apiUrl
-//const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apikey}&domainName=${domainInput}&outputFormat=json`;
-
-//const apikey = import.meta.env.VITE_API_KEY;
 </script>
 
 <template>
-  <h1 class="text-5xl font-bold">Domain Search Application</h1>
-  <br />
-  <br />
-  <form @submit.prevent="handleSearchKeyPress">
-    <input
-      type="text"
-      v-model="domainName"
-      id="domainName"
-      placeholder="Enter domain name"
-      autofocus
-      required
-    />
-    <button class="submit">
-      <i class="fa-brands fa-searchengin"></i>Search
-    </button>
-  </form>
+  <AppHeader />
+  <Form @search="handleSearch" />
   <div class="main-container">
-    <div class="container-1">
-      <h3>Search Results</h3>
-      <div class="searchResults">
-        <div>
-          <div v-if="isLoading">
-            <div class="ph-item">
-              <div class="ph-col-12">
-                <div class="ph-row">
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-4 empty big"></div>
-                  <div class="ph-col-4 empty big" ><b>Domain Name:</b></div>
-                  </br>
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Name Servers:</b>
-                  </div>
-                  </br>
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Registered On:</b>
-                  </div>
-                </br>
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Expires On:</b>
-                  </div>
-                  </br>
-                  <div class="ph-col-4 empty big"></div>
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Updated On:</b>
-                  </div>
-                  </br>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-4"></div>
-                  <div class="ph-col-8 empty"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Error:</b>
-                  </div>
-                  </br>
-                  <div class="ph-col-4 empty big"></div>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-12"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-else-if="searchError" style="color: red">
-            {{ searchError }}
-          </div>
-          <div v-else-if="searchResult?.WhoisRecord?.dataError && searchResult?.WhoisRecord?.dataError !== 'MASKED_WHOIS_DATA'">
-            <!-- todo:: show error message according to error code -->
-            This domain is not registered.
-          </div>
-          <div v-else-if="searchResult">
-            <span>
-              <span style="color: #33383a"><b>Domain Name:</b></span>
-              <br />
-              <span style="font-size: 20px">{{
-                searchResult?.WhoisRecord?.domainName || "N/A"
-              }}</span>
-            </span>
-            <br />
-            <br />
-            <span>
-              <span style="color: #33383a"><b> Domain Name Server:</b></span>
-              <br />
-              <span
-                ><i>{{
-                  searchResult?.WhoisRecord?.nameServers?.hostNames?.join(
-                    ", "
-                  ) || "N/A"
-                }}</i></span
-              >
-            </span>
-            <br />
-            <br />
-            <span>
-              <span style="color: #33383a"><b>Domain Registered On:</b> </span>
-              <br />
-              <span>{{
-                searchResult?.WhoisRecord?.audit?.createdDate || "N/A"
-              }}</span>
-            </span>
-            <br />
-            <br />
-            <span>
-              <span style="color: #33383a"><b>Domain Expires On:</b></span>
-              <br />
-              <span>
-                {{ searchResult?.WhoisRecord?.expiresDate || "N/A" }}</span
-              >
-            </span>
-            <br />
-            <br />
-            <span>
-              <span style="color: #33383a"><b> Domain Updated On:</b> </span>
-              <br />
-              <span>
-                {{ searchResult?.WhoisRecord?.updatedDate || "N/A" }}</span
-              >
-            </span>
-            <br />
-            <br />
-            <span>
-              <span style="color: #33383a"><b>Domain Error:</b> </span>
-              <br />
-              <span> {{ searchResult?.WhoisRecord?.dataError || "N/A" }}</span>
-            </span>
-          </div>
-          <div v-else>
-            <p>
-              Eg:- Name: ABC.COM<br />
-              Domain Name: ABC.COM<br />
-              Domain Name Server: ns1.abc.com<br />
-              Domain Registered On: 1996-05-22T04:00:00Z <br />
-              Domain Expires On: 2026-05-23T04:00:00Z <br />
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="container-2">
-      <h3>Previous Searches</h3>
-      <div class="History">
-        <span v-for="(item, index) in history" :key="index"
-          ><a href="#" @click.prevent="searchFromHistory(item)"
-            ><p>{{ item }}</p></a
-          ></span
-        >
-      </div>
-    </div>
+    <Results
+      :isLoading="isLoading"
+      :searchError="searchError"
+      :searchResult="searchResult"
+    />
+    <History :history="history" @searchFromHistory="searchFromHistory" />
   </div>
+  <ExpiryTracking />
 </template>
 
 <style scoped>
-.h1 {
-  text-align: center;
-  font-size: 3.5em;
-  color: #333;
+.main-container {
+  display: flex;
+  flex-direction: colomn;
+  justify-content: space-evenly;
   margin-top: 20px;
+  text-align: left;
+}
+.container-1 {
+  text-align: left;
+  width: 50%;
+  background-color: #f0f0f0;
+  padding: 20px;
+  margin-right: 10px;
+  border-radius: 8px;
+}
+.container-1:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
+}
+.container-2 {
+  width: 30%;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.container-2:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
+}
+
+.container-3 {
+    background-color: #f0f0f0;
+    padding:20px;
+    border: 1px solid #ddd;
+}
+
+.History {
+  cursor: pointer;
 }
 
 .h3 {
@@ -338,37 +178,6 @@ input[type="text"]:focus {
   color: #41171754;
   font-style: italic;
   font-size: 1.25em;
-}
-
-
-
-.main-container {
-  display: flex;
-  flex-direction: colomn;
-  justify-content: space-evenly;
-  margin-top: 20px;
-  text-align: left;
-}
-.container-1 {
-  text-align: left;
-  width: 50%;
-  background-color: #f0f0f0;
-  padding: 20px;
-  margin-right: 10px;
-  border-radius: 8px;
-}
-.container-1:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
-}
-.container-2 {
-  width: 30%;
-  background-color: #f0f0f0;
-  padding: 20px;
-  border-radius: 8px;
-}
-
-.container-2:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
 }
 
 .History {
