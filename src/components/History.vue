@@ -24,7 +24,7 @@ const emit = defineEmits(['searchFromHistory']);
 }
 
 .container-2 {
-  width: 30%;
+  width: 20%;
   background-color: #f0f0f0;
   padding: 20px;
   border-radius: 8px;
@@ -36,5 +36,6 @@ const emit = defineEmits(['searchFromHistory']);
 
 .History {
   cursor: pointer;
+  font-size: 18px;
 }
 </style>

@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 import Form from "./components/Form.vue";
 import Results from "./components/Results.vue";
 import History from "./components/History.vue";
-import ExpiryTracking from "./components/ExpiryTracking.vue";
+import Tracking from "./components/Tracking.vue";
 
 const searchError = ref(null);
 const isLoading = ref(false);
@@ -39,6 +39,8 @@ async function fetchWhoisData(domain) {
     const res = await fetch(apiUrl);
     const data = await res.json();
 
+    console.log(apiUrl);
+
     if (data.ErrorMessage) {
       searchError.value = data.ErrorMessage.msg;
       searchResult.value = null;
@@ -72,6 +74,18 @@ function handleSearch(domain) {
 function searchFromHistory(domain) {
   fetchWhoisData(domain);
 }
+
+// Compute days left for current search result
+const daysLeft = computed(() => {
+  const expiryDate = searchResult.value?.WhoisRecord?.expiresDate;
+  if (!expiryDate) return "N/A";
+  const today = new Date();
+  const expiry = new Date(expiryDate);
+  if (isNaN(expiry)) return "Invalid Date";
+  const diffTime = expiry - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays >= 0 ? diffDays : "Expired";
+});
 </script>
 
 <template>
@@ -84,14 +98,20 @@ function searchFromHistory(domain) {
       :searchResult="searchResult"
     />
     <History :history="history" @searchFromHistory="searchFromHistory" />
+
+    <Tracking
+      :domain="searchResult?.WhoisRecord?.domainName"
+      :expiryDate="searchResult?.WhoisRecord?.expiresDate"
+      :email="searchResult?.WhoisRecord?.administrativeContact?.email"
+      :daysLeft="daysLeft"
+    />
   </div>
-  <ExpiryTracking />
 </template>
 
 <style scoped>
 .main-container {
   display: flex;
-  flex-direction: colomn;
+  flex-direction:row;
   justify-content: space-evenly;
   margin-top: 20px;
   text-align: left;
@@ -119,9 +139,27 @@ function searchFromHistory(domain) {
 }
 
 .container-3 {
-    background-color: #f0f0f0;
-    padding:20px;
-    border: 1px solid #ddd;
+  width: 15%;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-left: 10px;
+}
+
+.container-3:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
+}
+
+.dname {
+  color: #1d1e1f;
+  font-size: 20px;
+}
+
+.expdate {
+  color: #ff0000;
+  font-size: 14px;
+  text-decoration: underline;
 }
 
 .History {

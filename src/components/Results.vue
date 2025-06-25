@@ -112,7 +112,7 @@ const props = defineProps({
 
 .container-1 {
   text-align:left;
-  width: 50%;
+  width: 40%;
   background-color: #f0f0f0;
   padding: 20px;
   border-radius: 8px;
