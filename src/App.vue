@@ -1,10 +1,165 @@
 <script setup>
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch, computed, onRenderTracked } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 import Form from "./components/Form.vue";
 import Results from "./components/Results.vue";
 import History from "./components/History.vue";
-import Tracking from "./components/Tracking.vue";
+import Tracker from "./components/tracker.vue";
+
+const tracked = ref([]);
+
+function trackDomain(WhoisRecord) {
+  const expiryDate = WhoisRecord.expiresDate || "N/A";
+  const daysLeft = computeDaysLeft(expiryDate);
+  const status = daysLeft === "Expired" ? "Expired" : "Active";
+
+  if (!isDomainTracked(WhoisRecord.domainName)) {
+    tracked.value.push({
+      domain: WhoisRecord.domainName,
+      email: WhoisRecord.administrativeContact?.email || "N/A",
+      expiryDate,
+      daysLeft,
+      status,
+      notified: false,
+    });
+    saveTrackedDomainsToStorage();
+  }
+}
+
+function trackResult() {
+  if (searchResult.value?.WhoisRecord) {
+    trackDomain(searchResult.value.WhoisRecord);
+  }
+}
+
+function isDomainTracked(domainName) {
+  return tracked.value.some((item) => item.domain === domainName);
+}
+
+function untrackDomain(domainName) {
+  tracked.value = tracked.value.filter((item) => item.domain !== domainName);
+  saveTrackedDomainsToStorage();
+}
+
+function saveTrackedDomainsToStorage() {
+  localStorage.setItem("trackedDomains", JSON.stringify(tracked.value));
+}
+
+function loadTrackedDomainsFromStorage() {
+  const storedDomains = localStorage.getItem("trackedDomains");
+  tracked.value = storedDomains
+    ? JSON.parse(storedDomains).map((item) => {
+        const daysLeft = computeDaysLeft(item.expiryDate);
+        const status = daysLeft === "Expired" ? "Expired" : "Active";
+        return { ...item, daysLeft, status, notified: item.notified ?? false };
+      })
+    : [];
+}
+
+function updateTrackedEmail({ domain, email }) {
+  const found = tracked.value.find((item) => item.domain === domain);
+  if (found) {
+    found.email = email;
+    saveTrackedDomainsToStorage();
+  }
+}
+
+function triggerExpiryCheck() {
+  tracked.value.forEach((item) => {
+    if (
+      typeof item.daysLeft === "number" &&
+      item.daysLeft <= 30 &&
+      item.daysLeft > 0 &&
+      !item.notified &&
+      item.email !== "N/A"
+    ) {
+      notifyUser(item);
+      item.notified = true;
+    }
+  });
+  saveTrackedDomainsToStorage();
+}
+
+onMounted(() => {
+  loadTrackedDomainsFromStorage();
+  triggerExpiryCheck();
+});
+
+watch(
+  tracked,
+  (newTracked) => {
+    newTracked.forEach((item) => {
+      if (
+        typeof item.daysLeft === "number" &&
+        item.daysLeft <= 30 &&
+        item.daysLeft > 0 &&
+        !item.notified &&
+        item.email !== "N/A"
+      ) {
+        notifyUser(item);
+        item.notified = true;
+        saveTrackedDomainsToStorage();
+      }
+    });
+  },
+  { deep: true }
+);
+
+function notifyUser(item) {
+  console.log(
+    `🔔 Notification: Domain "${item.domain}" expires in ${item.daysLeft} days. Notify at ${item.email}`
+  );
+  // Future: Send email using an API like EmailJS, SendGrid, Firebase
+}
+
+// Check if a domain is already tracked
+//function isDomainTracked(domainName) {
+//return tracked.value.some(item => item.domain === domainName);
+//}
+
+// Add a domain to tracked list (whois is an object with domain and email)
+//function trackDomain(WhoisRecord) {
+//if (!isDomainTracked(WhoisRecord.domain)) {
+//tracked.value.push({
+// domain: WhoisRecord.domainName,
+//email: WhoisRecord.administrativeContact?.email || "N/A",
+//expiryDate: WhoisRecord.expiresDate || "N/A",
+//daysLeft: computeDaysLeft(expiryDate)
+//});
+//saveTrackedDomainsToStorage();
+//}
+//}
+
+// Remove a domain from tracked list
+//function untrackDomain(domainName) {
+//tracked.value = tracked.value.filter(item => item.domain !== domainName);
+//saveTrackedDomainsToStorage();
+//}
+
+// Load tracked domains from localStorage
+//function loadTrackedDomainsFromStorage() {
+//const storedDomains = localStorage.getItem("trackedDomains");
+//tracked.value = storedDomains ? JSON.parse(storedDomains) : [];
+//}
+
+// Save tracked domains to localStorage
+//function saveTrackedDomainsToStorage() {
+//localStorage.setItem("trackedDomains", JSON.stringify(tracked.value));
+//}
+
+//onMounted(() => {
+//loadTrackedDomainsFromStorage();
+//});
+
+function computeDaysLeft(expiryDate) {
+  if (!expiryDate) return "N/A";
+  const today = new Date();
+  const expiry = new Date(expiryDate);
+  if (isNaN(expiry)) return "Invalid Date";
+  const diffTime = expiry - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays >= 0 ? diffDays : "Expired";
+}
 
 const searchError = ref(null);
 const isLoading = ref(false);
@@ -55,6 +210,7 @@ async function fetchWhoisData(domain) {
   }
 }
 
+// Add a domain search to history
 function appendSearchToHistory(domain) {
   if (!history.value.includes(domain)) {
     history.value.unshift(domain);
@@ -74,18 +230,6 @@ function handleSearch(domain) {
 function searchFromHistory(domain) {
   fetchWhoisData(domain);
 }
-
-// Compute days left for current search result
-const daysLeft = computed(() => {
-  const expiryDate = searchResult.value?.WhoisRecord?.expiresDate;
-  if (!expiryDate) return "N/A";
-  const today = new Date();
-  const expiry = new Date(expiryDate);
-  if (isNaN(expiry)) return "Invalid Date";
-  const diffTime = expiry - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays >= 0 ? diffDays : "Expired";
-});
 </script>
 
 <template>
@@ -96,22 +240,23 @@ const daysLeft = computed(() => {
       :isLoading="isLoading"
       :searchError="searchError"
       :searchResult="searchResult"
+      @track="trackResult"
     />
     <History :history="history" @searchFromHistory="searchFromHistory" />
-
-    <Tracking
-      :domain="searchResult?.WhoisRecord?.domainName"
-      :expiryDate="searchResult?.WhoisRecord?.expiresDate"
-      :email="searchResult?.WhoisRecord?.administrativeContact?.email"
-      :daysLeft="daysLeft"
-    />
   </div>
+  <button @click="trackResult" class="track-expiry-button">Track Domain Expiry </button>
+  <Tracker
+    :tracked="tracked"
+    @untrackDomain="untrackDomain"
+    @updateEmail="updateTrackedEmail"
+    @manualNotify="notifyUser"
+  />
 </template>
 
 <style scoped>
 .main-container {
   display: flex;
-  flex-direction:row;
+  flex-direction: row;
   justify-content: space-evenly;
   margin-top: 20px;
   text-align: left;
@@ -139,12 +284,14 @@ const daysLeft = computed(() => {
 }
 
 .container-3 {
-  width: 15%;
+  display: block;
+  margin: 0 auto;
+  width: 50%;
+  margin-top: 10px;
   background-color: #f0f0f0;
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  margin-left: 10px;
 }
 
 .container-3:hover {
@@ -221,4 +368,19 @@ input[type="text"]:focus {
 .History {
   cursor: pointer;
 }
+
+.track-expiry-button {
+  background-color: #3d67f0;
+  color: #1d1e1f;
+  margin-top: 10px;
+  padding: 15px;
+  border: 1px solid #3d67f0;
+  border-radius: 5px;
+}
+
+.track-expiry-button:hover{
+   background-color: #5369af;
+  color: #1d1e1f;
+}
+
 </style>

@@ -1,64 +1,26 @@
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps , defineEmits} from 'vue';
 const props = defineProps({
   isLoading: Boolean,
   searchError: String,
   searchResult: Object,
 });
+
+const emit = defineEmits (['track']);
 </script>
 
 <template>
   <div class="container-1">
-    <h3 class="h3">Search Results</h3>
+    <h3 class="h3"><b>Search Results</b></h3>
     <div class="Search-Results">
       <div v-if="isLoading">
-              <div class="ph-col-12">
-                <div class="ph-row">
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-4 empty big"></div>
-                  <div class="ph-col-4 empty big" ><b>Domain Name:</b></div>
-                  </br>
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Name Servers:</b>
-                  </div>
-                  </br>
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Registered On:</b>
-                  </div>
-                </br>
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Expires On:</b>
-                  </div>
-                  </br>
-                  <div class="ph-col-4 empty big"></div>
-                  <div class="ph-col-6"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Updated On:</b>
-                  </div>
-                  </br>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-4"></div>
-                  <div class="ph-col-8 empty"></div>
-                  <div class="ph-col-4 empty big" style="text-align: left;">
-                    <b>Domain Error:</b>
-                  </div>
-                  </br>
-                  <div class="ph-col-4 empty big"></div>
-                  <div class="ph-col-12"></div>
-                  <div class="ph-col-6 empty"></div>
-                  <div class="ph-col-12"></div>
-                </div>
-              </div>
+            <div
+class="loadingio-eclipse">
+  <div class="ldio-rpinwye8j0b">
+    <div>
+    </div>
+  </div>
+</div>
             
       </div>
       <div v-else-if="searchError" style="color: red;">{{ searchError }}</div>
@@ -101,8 +63,50 @@ const props = defineProps({
       </div>
     </div>
   </div>
+  
 </template>
 <style scoped>
+
+.h3 {
+  text-align: center;
+  color:#2563eb;
+  font-size:20px;
+
+}
+
+@keyframes ldio-rpinwye8j0b {
+  0% { transform: rotate(0deg) }
+  50% { transform: rotate(180deg) }
+  100% { transform: rotate(360deg) }
+}
+.ldio-rpinwye8j0b div {
+  position: absolute;
+  animation: ldio-rpinwye8j0b 1s linear infinite;
+  width: 160px;
+  height: 160px;
+  top: 20px;
+  left: 20px;
+  border-radius: 50%;
+  box-shadow: 0 4px 0 0 #e15b64;
+  transform-origin: 80px 82px;
+}
+.loadingio-eclipse {
+  width: 200px;
+  height: 200px;
+  display: inline-block;
+  overflow: hidden;
+}
+.ldio-rpinwye8j0b {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform: translateZ(0) scale(1);
+  backface-visibility: hidden;
+  transform-origin: 0 0; /* see note above */
+}
+.ldio-rpinwye8j0b div { box-sizing: content-box; }
+
+
 
 .h3 {
   text-align: center;
@@ -110,12 +114,14 @@ const props = defineProps({
 
 
 
-.container-1 {
+.container-1 important {
   text-align:left;
-  width: 40%;
-  background-color: #f0f0f0;
+  background-color: #f0f0f0; 
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   padding: 20px;
-  border-radius: 8px;
+  margin: 10px;
+  margin-bottom: 10px;
 }
 .container-1:hover {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);

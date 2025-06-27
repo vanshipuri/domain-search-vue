@@ -1,5 +1,4 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 const props = defineProps({
   history: Array,
 });
@@ -7,12 +6,14 @@ const emit = defineEmits(['searchFromHistory']);
 </script>
 
 <template>
-  <div class="container-2">
-    <h3 class="h3">Previous Searches</h3>
+<div class="container-2">
+    <h3 class="h3"><b>Previous Searches</b></h3>
     <div class="History">
       <span v-for="(item,index) in history" :key="index">
         <a href="#" @click.prevent="emit('searchFromHistory', item)">
-            <p>{{ item }}</p></a>
+            <p>{{ item }}</p>
+          <hr>
+        </a>
       </span>
     </div>
   </div>
@@ -21,13 +22,18 @@ const emit = defineEmits(['searchFromHistory']);
 <style scoped>
 .h3 {
   text-align: center;
+  color:#2563eb;
+  font-size:20px;
+
 }
 
 .container-2 {
   width: 20%;
-  background-color: #f0f0f0;
+  height: fit-content;
+  background-color: #f0f0f0; 
   padding: 20px;
   border-radius: 8px;
+  margin-bottom: 10px;
 }
 
 .container-2:hover {
@@ -37,5 +43,10 @@ const emit = defineEmits(['searchFromHistory']);
 .History {
   cursor: pointer;
   font-size: 18px;
+  margin:10px;
+}
+
+.span{
+  margin: 10px;
 }
 </style>
