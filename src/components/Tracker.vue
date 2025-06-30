@@ -28,7 +28,7 @@ const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify"]);
 
 <template>
   <div
-    class="container-3 flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50"
+    class="container-3 flex flex-col items-center justify-center "
   >
     <h3><b>Expiry Tracker</b></h3>
     <table
@@ -119,7 +119,7 @@ tbody tr {
 button {
   padding: 8px 12px;
   border-radius: 12px;
-  transition: background 0.3s ease;
+  transition: 0.3s ease;
   border: none;
   cursor: pointer;
 }
@@ -164,7 +164,7 @@ td.status {
 }
 
 .track-untrack-button {
-  background-color: #bb4848 !important;
+  background-color: #b66565 !important;
   color: #1d1e1f;
   cursor: pointer;
   border: none;
@@ -174,9 +174,14 @@ td.status {
   margin: 4px 0;
 }
 
+.track-untrack-button:hover{
+  background-color: #b44646 !important;
+}
+
 .container-3 {
   display: block;
   margin: 0 auto;
+  max-height: fit-content;
   width: 90% !important;
   margin-top: 10px;
   background-color: #f0f0f0;

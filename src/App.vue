@@ -371,7 +371,7 @@ input[type="text"]:focus {
 
 .track-expiry-button {
   background-color: #3d67f0;
-  color: #1d1e1f;
+  color: #f0f2f5;
   margin-top: 10px;
   padding: 15px;
   border: 1px solid #3d67f0;
@@ -380,7 +380,7 @@ input[type="text"]:focus {
 
 .track-expiry-button:hover{
    background-color: #5369af;
-  color: #1d1e1f;
+  color: #e3e7eb;
 }
 
 </style>

@@ -49,8 +49,12 @@ class="loadingio-eclipse">
         </p>
       </div>
       <div v-else-if="searchResult?.WhoisRecord?.dataError && searchResult?.WhoisRecord?.dataError !== 'MASKED_WHOIS_DATA'">
-            <!-- todo:: show error message according to error code -->
-            This domain is not registered.
+        <template v-if="searchResult?.WhoisRecord?.dataError === 'NO_DATA'">
+          This domain does not exist.
+        </template>
+        <template v-else>
+          This domain is not registered.
+        </template>
       </div>
       <div v-else>
         <p style="text-align:left;">
