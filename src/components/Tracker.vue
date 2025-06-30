@@ -27,9 +27,13 @@ const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify"]);
 </script>
 
 <template>
-  <div class="container-3 flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50">
+  <div
+    class="container-3 flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50"
+  >
     <h3><b>Expiry Tracker</b></h3>
-    <table v-if="tracked.length" class="table-auto bg-white shadow-md rounded-lg overflow-hidden mt-6">
+    <table
+      v-if="tracked.length"
+    >
       <thead>
         <tr>
           <th>Sr.</th>
@@ -87,20 +91,80 @@ const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify"]);
 </template>
 
 <style scoped>
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 16px;
+  text-align: left;
+}
+
+thead {
+  background-color: #f3f4f6;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+button {
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: background 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+button:first-child {
+  background-color: #ef4444;
+  color: white;
+}
+
+button:first-child:hover {
+  background-color: #dc2626;
+}
+
+button:last-child {
+  background-color: #facc15;
+  color: white;
+}
+
+button:last-child:hover {
+  background-color: #eab308;
+}
+
+td.email {
+  color: #166534;
+  font-weight: 500;
+}
+
+td.expiry {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+td.status {
+  color: #22c55e;
+  font-weight: bold;
+}
+
 .h3 {
   text-align: center;
-  color:#2563eb;
-  font-size:20px;
-
-}
-.table {
-  display:block;
-  margin:auto;
-  padding:15px;
+  color: #2563eb;
+  font-size: 20px;
 }
 
 .track-untrack-button {
-  background-color: #bb4848;
+  background-color: #bb4848 !important;
   color: #1d1e1f;
   cursor: pointer;
   border: none;
@@ -113,13 +177,14 @@ const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify"]);
 .container-3 {
   display: block;
   margin: 0 auto;
-  width: 100% !important;
+  width: 90% !important;
   margin-top: 10px;
   background-color: #f0f0f0;
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
 }
+
 
 .track-notify-button {
   background-color: #c0be4a;
