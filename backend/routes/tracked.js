@@ -1,0 +1,53 @@
+const express = require("express");
+const Tracked = require("../db/sqlite");
+
+const router = express.Router();
+const repo = new Tracked();
+
+// GET all tracked domains
+router.get("/", (req, res) => {
+  try {
+    const data = repo.getAll();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch tracked domains" });
+  }
+});
+
+// POST a new domain to track
+router.post("/", (req, res) => {
+  const { domain, email, expiryDate, notified } = req.body;
+  if (!domain || !expiryDate) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    repo.save(domain, email || "N/A", expiryDate, notified ? 1 : 0);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to save domain" });
+  }
+});
+
+// DELETE a domain from tracking
+router.delete("/:domain", (req, res) => {
+  try {
+    repo.delete(req.params.domain);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete domain" });
+  }
+});
+
+// PATCH update the email
+router.patch("/email", (req, res) => {
+  const { domain, email } = req.body;
+  try {
+    repo.updateEmail(domain, email);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update email" });
+  }
+});
+
+module.exports = router;

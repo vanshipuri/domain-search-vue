@@ -75,7 +75,7 @@ const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify"]);
           </td>
           <td>
             <button
-              @click="emit('manualNotify', item)"
+              @click="emit('manualNotify', item )"
               class="track-notify-button"
             >
               Notify

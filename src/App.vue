@@ -1,34 +1,44 @@
 <script setup>
-import { ref, onMounted, watch, computed, onRenderTracked } from "vue";
+import { ref, onMounted, watch } from "vue";
 import AppHeader from "./components/AppHeader.vue";
 import Form from "./components/Form.vue";
 import Results from "./components/Results.vue";
 import History from "./components/History.vue";
 import Tracker from "./components/tracker.vue";
+import axios from "axios";
 
 const tracked = ref([]);
+const searchError = ref(null);
+const isLoading = ref(false);
+const domainName = ref("");
+const searchResult = ref(null);
+const history = ref([]);
+const localStorageKey = "history";
 
-function trackDomain(WhoisRecord) {
-  const expiryDate = WhoisRecord.expiresDate || "N/A";
+async function trackDomain(WhoisRecord) {
+  const expiryDate = WhoisRecord.expiresDate;
+  //if domain does not exist don't show in tracking table
+  if (!expiryDate) {
+    //To show alert this domain won't be tracked as this  domain does not exist 
+    console.warn("Domain does not exist, skipping tracking.");
+    return;
+  }
+
   const daysLeft = computeDaysLeft(expiryDate);
   const status = daysLeft === "Expired" ? "Expired" : "Active";
 
   if (!isDomainTracked(WhoisRecord.domainName)) {
-    tracked.value.push({
+    const domainObj = {
       domain: WhoisRecord.domainName,
       email: WhoisRecord.administrativeContact?.email || "N/A",
       expiryDate,
       daysLeft,
       status,
-      notified: false,
-    });
-    saveTrackedDomainsToStorage();
-  }
-}
+      notified: [],
+    };
 
-function trackResult() {
-  if (searchResult.value?.WhoisRecord) {
-    trackDomain(searchResult.value.WhoisRecord);
+    tracked.value.push(domainObj); 
+    await saveTrackedDomainToBackend(domainObj);
   }
 }
 
@@ -36,120 +46,66 @@ function isDomainTracked(domainName) {
   return tracked.value.some((item) => item.domain === domainName);
 }
 
-function untrackDomain(domainName) {
-  tracked.value = tracked.value.filter((item) => item.domain !== domainName);
-  saveTrackedDomainsToStorage();
-}
-
-function saveTrackedDomainsToStorage() {
-  localStorage.setItem("trackedDomains", JSON.stringify(tracked.value));
-}
-
-function loadTrackedDomainsFromStorage() {
-  const storedDomains = localStorage.getItem("trackedDomains");
-  tracked.value = storedDomains
-    ? JSON.parse(storedDomains).map((item) => {
-        const daysLeft = computeDaysLeft(item.expiryDate);
-        const status = daysLeft === "Expired" ? "Expired" : "Active";
-        return { ...item, daysLeft, status, notified: item.notified ?? false };
-      })
-    : [];
-}
-
-function updateTrackedEmail({ domain, email }) {
-  const found = tracked.value.find((item) => item.domain === domain);
-  if (found) {
-    found.email = email;
-    saveTrackedDomainsToStorage();
+async function saveTrackedDomainToBackend(domainObj) {
+  try {
+    await axios.post("http://localhost:5000/api/track", domainObj);
+  } catch (error) {
+    console.error("Error saving domain:", error);
   }
 }
 
-function triggerExpiryCheck() {
-  tracked.value.forEach((item) => {
-    if (
-      typeof item.daysLeft === "number" &&
-      item.daysLeft <= 30 &&
-      item.daysLeft > 0 &&
-      !item.notified &&
-      item.email !== "N/A"
-    ) {
-      notifyUser(item);
-      item.notified = true;
-    }
-  });
-  saveTrackedDomainsToStorage();
-}
-
-onMounted(() => {
-  loadTrackedDomainsFromStorage();
-  triggerExpiryCheck();
-});
-
-watch(
-  tracked,
-  (newTracked) => {
-    newTracked.forEach((item) => {
-      if (
-        typeof item.daysLeft === "number" &&
-        item.daysLeft <= 30 &&
-        item.daysLeft > 0 &&
-        !item.notified &&
-        item.email !== "N/A"
-      ) {
-        notifyUser(item);
-        item.notified = true;
-        saveTrackedDomainsToStorage();
-      }
+async function loadTrackedDomainsFromBackend() {
+  try {
+    const response = await axios.get("http://localhost:5000/api/track");
+    tracked.value = response.data.map((item) => {
+      const daysLeft = computeDaysLeft(item.expiryDate);
+      const status = daysLeft === "Expired" ? "Expired" : "Active";
+      return { ...item, daysLeft, status };
     });
-  },
-  { deep: true }
-);
-
-function notifyUser(item) {
-  console.log(
-    `🔔 Notification: Domain "${item.domain}" expires in ${item.daysLeft} days. Notify at ${item.email}`
-  );
-  // Future: Send email using an API like EmailJS, SendGrid, Firebase
+  } catch (error) {
+    console.error("Error loading tracked domains:", error);
+  }
 }
 
-// Check if a domain is already tracked
-//function isDomainTracked(domainName) {
-//return tracked.value.some(item => item.domain === domainName);
-//}
+async function untrackDomain(domainName) {
+  try {
+    await axios.delete(`http://localhost:5000/api/track/${domainName}`);
+    tracked.value = tracked.value.filter((item) => item.domain !== domainName);
+  } catch (error) {
+    console.error("Error deleting domain:", error);
+  }
+}
 
-// Add a domain to tracked list (whois is an object with domain and email)
-//function trackDomain(WhoisRecord) {
-//if (!isDomainTracked(WhoisRecord.domain)) {
-//tracked.value.push({
-// domain: WhoisRecord.domainName,
-//email: WhoisRecord.administrativeContact?.email || "N/A",
-//expiryDate: WhoisRecord.expiresDate || "N/A",
-//daysLeft: computeDaysLeft(expiryDate)
-//});
-//saveTrackedDomainsToStorage();
-//}
-//}
+async function updateTrackedEmail({ domain, email }) {
+  try {
+    await axios.patch("http://localhost:5000/api/track/email", {
+      domain,
+      email,
+    });
+    const item = tracked.value.find((d) => d.domain === domain);
+    if (item) item.email = email;
+  } catch (error) {
+    console.error("Error updating email:", error);
+  }
+}
 
-// Remove a domain from tracked list
-//function untrackDomain(domainName) {
-//tracked.value = tracked.value.filter(item => item.domain !== domainName);
-//saveTrackedDomainsToStorage();
-//}
+//  Always send email when Notify button is clicked (no condition)
+async function notifyUser(item) {
+  console.log("Notify clicked for:", item);
 
-// Load tracked domains from localStorage
-//function loadTrackedDomainsFromStorage() {
-//const storedDomains = localStorage.getItem("trackedDomains");
-//tracked.value = storedDomains ? JSON.parse(storedDomains) : [];
-//}
+  try {
+    await axios.post("http://localhost:5000/api/notify", {
+      domain: item.domain,
+      email: item.email,
+      daysLeft: item.daysLeft || 30, // default for testing
+    });
 
-// Save tracked domains to localStorage
-//function saveTrackedDomainsToStorage() {
-//localStorage.setItem("trackedDomains", JSON.stringify(tracked.value));
-//}
-
-//onMounted(() => {
-//loadTrackedDomainsFromStorage();
-//});
+    item.notifiedDays = [...(item.notifiedDays || []), item.daysLeft];
+    await updateTrackedEmail(item);
+  } catch (error) {
+    console.error("Error sending notification email:", error);
+  }
+}
 
 function computeDaysLeft(expiryDate) {
   if (!expiryDate) return "N/A";
@@ -161,40 +117,13 @@ function computeDaysLeft(expiryDate) {
   return diffDays >= 0 ? diffDays : "Expired";
 }
 
-const searchError = ref(null);
-const isLoading = ref(false);
-const domainName = ref("");
-const searchResult = ref(null);
-const history = ref([]);
-const localStorageKey = "history";
-
-// Load history from localStorage
-onMounted(() => {
-  const storedHistory = localStorage.getItem(localStorageKey);
-  if (storedHistory) {
-    history.value = JSON.parse(storedHistory);
-  }
-});
-
-// Save history to localStorage
-watch(
-  history,
-  (newValue) => {
-    localStorage.setItem(localStorageKey, JSON.stringify(newValue));
-  },
-  { deep: true }
-);
-
 async function fetchWhoisData(domain) {
   isLoading.value = true;
   searchError.value = null;
   try {
-    const apikey = import.meta.env.VITE_API_KEY;
-    const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apikey}&domainName=${domain}&outputFormat=json`;
+    const apiUrl = `http://localhost:5000/api/whois?domain=${domain}`;
     const res = await fetch(apiUrl);
     const data = await res.json();
-
-    console.log(apiUrl);
 
     if (data.ErrorMessage) {
       searchError.value = data.ErrorMessage.msg;
@@ -210,7 +139,29 @@ async function fetchWhoisData(domain) {
   }
 }
 
-// Add a domain search to history
+function trackResult() {
+  if (searchResult.value?.WhoisRecord) {
+    trackDomain(searchResult.value.WhoisRecord);
+  }
+}
+
+onMounted(() => {
+  const storedHistory = localStorage.getItem(localStorageKey);
+  if (storedHistory) {
+    history.value = JSON.parse(storedHistory);
+  }
+  loadTrackedDomainsFromBackend();
+  // triggerExpiryCheck(); — moved to backend cron
+});
+
+watch(
+  history,
+  (newValue) => {
+    localStorage.setItem(localStorageKey, JSON.stringify(newValue));
+  },
+  { deep: true }
+);
+
 function appendSearchToHistory(domain) {
   if (!history.value.includes(domain)) {
     history.value.unshift(domain);
@@ -230,6 +181,20 @@ function handleSearch(domain) {
 function searchFromHistory(domain) {
   fetchWhoisData(domain);
 }
+
+
+
+  //const notifyDays = [30, 14, 7, 3, 2, 1];
+
+  //for (const days of notifyDays) {
+    //if (
+      //item.daysLeft == days &&
+      //!item.notifiedDays?.includes(days) &&
+      //item.email !== "N/A"
+    //) {
+      //console.log(
+        //` Sending Email: Domain "${item.domain}" expires in ${days} days. Notify at ${item.email}`
+      //);
 </script>
 
 <template>
@@ -244,7 +209,9 @@ function searchFromHistory(domain) {
     />
     <History :history="history" @searchFromHistory="searchFromHistory" />
   </div>
-  <button @click="trackResult" class="track-expiry-button">Track Domain Expiry </button>
+  <button @click="trackResult" class="track-expiry-button">
+    Track Domain Expiry
+  </button>
   <Tracker
     :tracked="tracked"
     @untrackDomain="untrackDomain"
@@ -378,9 +345,8 @@ input[type="text"]:focus {
   border-radius: 5px;
 }
 
-.track-expiry-button:hover{
-   background-color: #5369af;
+.track-expiry-button:hover {
+  background-color: #5369af;
   color: #e3e7eb;
 }
-
 </style>
