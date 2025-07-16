@@ -20,8 +20,14 @@ async function trackDomain(WhoisRecord) {
   const expiryDate = WhoisRecord.expiresDate;
   //if domain does not exist don't show in tracking table
   if (!expiryDate) {
-    //To show alert this domain won't be tracked as this  domain does not exist 
     console.warn("Domain does not exist, skipping tracking.");
+       // Show nice alert
+    Swal.fire({
+      icon: 'warning',
+      title: 'Invalid Domain',
+      text: 'This domain does not exist and will not be tracked.',
+      confirmButtonColor: '#2563eb'
+    });
     return;
   }
 
