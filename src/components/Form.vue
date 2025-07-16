@@ -10,7 +10,10 @@ function onSubmit() {
 </script>
 
 <template>
-  <form class="form" @submit.prevent="onSubmit">
+  <form
+    class="form flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-2"
+    @submit.prevent="onSubmit"
+  >
     <input
       type="text"
       v-model="domainName"
@@ -19,12 +22,10 @@ function onSubmit() {
       autofocus
       required
     />
-    <button class="submit w-half sm:w-auto px-5 sm:px-5 py-3 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition
- bg-[#2563eb] hover:bg-[#1e40af] rounded-xl shadow-md transition-all duration-300 ">
+    <button class="submit w-full sm:w-auto">
       <i class="fa-brands fa-searchengin" style="margin-right:8px;"></i>Search
     </button>
   </form>
-  
 </template>
 
 <style scoped>
@@ -32,13 +33,14 @@ function onSubmit() {
   margin-top: 0px;
   padding: 16px 18px;
   margin-left: 20px;
-  background-color:  #2563eb;
+  background-color: #2563eb;
   color: white;
   border: 1px solid #2563eb;
   border-radius: 10px;
   cursor: pointer;
-  font-size:15px;
+  font-size: 15px;
   box-shadow: 1px 1px 5px rgba(14, 14, 14, 0.356);
+  transition: all 0.3s ease-in-out;
 }
 
 .submit:hover {
@@ -53,12 +55,19 @@ function onSubmit() {
 }
 
 .form {
-  display: block;
+  display: flex;
+  flex-direction: column;
   margin: auto;
   justify-content: center;
   margin-top: 5px;
   padding: 30px;
   gap: 4px;
+}
+
+@media (min-width: 640px) {
+  .form {
+    flex-direction: row;
+  }
 }
 
 input[type="text"] {
@@ -80,5 +89,4 @@ input[type="text"]:focus {
   font-style: italic;
   font-size: 1.25em;
 }
-
 </style>
