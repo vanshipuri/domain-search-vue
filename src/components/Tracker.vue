@@ -9,12 +9,8 @@ const props = defineProps({
 });
 
 function confirmUntrack(domain) {
-  const userConfirmed = window.confirm(
-    `Are you sure you want to untrack "${domain}"?`
-  );
-  if (userConfirmed) {
-    emit("untrackDomain", domain);
-  }
+  // 🚨 Just emit the event — App.vue will handle SweetAlert
+  emit("untrackDomain", domain);
 }
 
 function formatDate(dateString) {

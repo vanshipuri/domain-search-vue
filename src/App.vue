@@ -6,6 +6,7 @@ import Results from "./components/Results.vue";
 import History from "./components/History.vue";
 import Tracker from "./components/tracker.vue";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const tracked = ref([]);
 const searchError = ref(null);
@@ -67,14 +68,39 @@ async function loadTrackedDomainsFromBackend() {
   }
 }
 
-async function untrackDomain(domainName) {
-  try {
-    await axios.delete(`http://localhost:5000/api/track/${domainName}`);
-    tracked.value = tracked.value.filter((item) => item.domain !== domainName);
-  } catch (error) {
-    console.error("Error deleting domain:", error);
+async function untrackDomain(domain) {
+  const confirm = await Swal.fire({
+    title: "Are you sure?",
+    text: `Do you really want to untrack ${domain}?`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, untrack it!",
+  });
+
+  if (confirm.isConfirmed) {
+    try {
+      await axios.delete(`http://localhost:5000/api/track/${domain}`);
+      tracked.value = tracked.value.filter((item) => item.domain !== domain);
+
+      // Optional: success alert
+      Swal.fire({
+        title: "Deleted!",
+        text: `${domain} has been untracked.`,
+        icon: "success",
+      });
+    } catch (error) {
+      console.error("Error deleting domain:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Oops!",
+        text: `Failed to untrack ${domain}. Try again.`,
+      });
+    }
   }
 }
+
 
 async function updateTrackedEmail({ domain, email }) {
   try {
@@ -94,17 +120,30 @@ async function notifyUser(item) {
   console.log("Notify clicked for:", item);
 
   try {
-    await axios.post("http://localhost:5000/api/notify", {
+    const response = await axios.post("http://localhost:5000/api/notify", {
       domain: item.domain,
       email: item.email,
       daysLeft: item.daysLeft || 30, // default for testing
     });
-
+ // Alert using sweetAlert
+    Swal.fire({
+      icon: "success",
+      title: "Email Sent!",
+      html: `<strong>${item.domain}</strong> will expire in <b>${item.daysLeft} days</b><br/>Email sent to <code>${item.email}</code>`,
+      confirmButtonColor: "#4f46e5",
+    });
+    //update notifiedDays
     item.notifiedDays = [...(item.notifiedDays || []), item.daysLeft];
     await updateTrackedEmail(item);
   } catch (error) {
     console.error("Error sending notification email:", error);
-  }
+    //  Sweet error alert
+    Swal.fire({
+      icon: "error",
+      title: "Oops!",
+      text: "Failed to send email. Please try again.",
+      confirmButtonColor: "#e11d48",
+    }); }
 }
 
 function computeDaysLeft(expiryDate) {
