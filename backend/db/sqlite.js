@@ -35,6 +35,13 @@ class TrackedRepository {
       throw err;
     }
   }
+  
+  getByDomain(domain) {
+  return this.db
+    .prepare("SELECT * FROM tracked_domains WHERE domain = ?")
+    .get(domain);
+}
+
 
   delete(domain) {
     return this.db

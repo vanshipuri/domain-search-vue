@@ -15,7 +15,11 @@ function computeDaysLeft(expiryDate) {
 }
 
 async function notifyUser(item) {
-  const notifyDays = [30, 14, 7,5,3,2,1];
+  const notifyDays = (item.notifyDaysInput || "")
+  .split(",")
+  .map(d => parseInt(d.trim()))
+  .filter(d => !isNaN(d));
+
 
   for (const day of notifyDays) {
     if (
@@ -35,7 +39,7 @@ async function notifyUser(item) {
         });
 
         // Update notifiedDays in DB
-        const updateNotified = [...item(item.notifiedDays || []), day];
+       const updateNotified = Array.from(new Set([...(item.notifiedDays || []), day]));
         await repository.updateNotifiedDays(item.domain, updateNotified);
 
         console.log(`Notified ${item.email} for domain ${item.domain}`);

@@ -1,11 +1,22 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
+import { watchEffect } from "vue";
+
 
 const props = defineProps({
   tracked: {
     type: Array,
     default: () => [],
   },
+});
+
+// Prepare editable notifyDays input
+watchEffect(() => {
+  props.tracked.forEach(item => {
+    if (!item.notifyDaysInput) {
+      item.notifyDaysInput = (item.notifiedDays || []).join(","); // default
+    }
+  });
 });
 
 function confirmUntrack(domain) {
@@ -19,22 +30,19 @@ function formatDate(dateString) {
   return dateOnly;
 }
 
-const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify"]);
+const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify", "updateNotifyDays"]);
 </script>
 
 <template>
-  <div
-    class="container-3 flex flex-col items-center justify-center "
-  >
+  <div class="container-3 flex flex-col items-center justify-center">
     <h3><b>Expiry Tracker</b></h3>
-    <table
-      v-if="tracked.length"
-    >
+    <table v-if="tracked.length">
       <thead>
         <tr>
           <th>Sr.</th>
           <th>Domain</th>
           <th>Email</th>
+          <th>Notify Days</th>
           <th>Expiry</th>
           <th>Days Left</th>
           <th>Status</th>
@@ -56,6 +64,15 @@ const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify"]);
               placeholder="Enter email"
             />
           </td>
+          <td>
+  <input
+    type="text"
+    v-model="item.notifyDaysInput"
+    @change="emit('updateNotifyDays', { domain: item.domain, notifyDays: item.notifyDaysInput })"
+    placeholder="e.g. 30,14,7"
+    class="email-input"
+  />
+</td>
           <td class="expdate">{{ formatDate(item.expiryDate) }}</td>
           <td class="renewday">{{ item.daysLeft }}</td>
           <td :class="item.status === 'Expired' ? 'expired' : 'active'">
@@ -71,7 +88,7 @@ const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify"]);
           </td>
           <td>
             <button
-              @click="emit('manualNotify', item )"
+              @click="emit('manualNotify', item)"
               class="track-notify-button"
             >
               Notify
@@ -91,12 +108,13 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1.5rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 16px;
   overflow: hidden;
 }
 
-th, td {
+th,
+td {
   padding: 16px;
   text-align: left;
 }
@@ -170,7 +188,7 @@ td.status {
   margin: 4px 0;
 }
 
-.track-untrack-button:hover{
+.track-untrack-button:hover {
   background-color: #b44646 !important;
 }
 
@@ -185,7 +203,6 @@ td.status {
   border: 1px solid #ddd;
   border-radius: 8px;
 }
-
 
 .track-notify-button {
   background-color: #c0be4a;

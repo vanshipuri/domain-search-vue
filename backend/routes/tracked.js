@@ -40,14 +40,31 @@ router.delete("/:domain", (req, res) => {
 });
 
 // PATCH update the email
+// PATCH: update email and optionally notifiedDays
 router.patch("/email", (req, res) => {
-  const { domain, email } = req.body;
+  const { domain, email, notifiedDays } = req.body;
+
+  if (!domain) {
+    return res.status(400).json({ error: "Domain is required" });
+  }
+
   try {
-    repo.updateEmail(domain, email);
+    // Update email
+    if (email) {
+      repo.updateEmail(domain, email);
+    }
+
+    // Update notifiedDays if provided
+    if (Array.isArray(notifiedDays)) {
+      repo.updateNotifiedDays(domain, notifiedDays);
+    }
+
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: "Failed to update email" });
+    console.error("Error updating domain:", err.message);
+    res.status(500).json({ error: "Failed to update domain details" });
   }
 });
+
 
 module.exports = router;

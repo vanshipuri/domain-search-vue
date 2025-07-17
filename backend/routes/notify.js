@@ -19,6 +19,8 @@ router.post("/", async (req, res) => {
     }
 
   try {
+    console.log(`Preparing to send mail to ${email} for domain ${domain}, ${daysLeft} days left`);
+ 
     await transporter.sendMail({
       from: '"Domain Tracker" <admin@domaintracker.com>',
       to: email,
