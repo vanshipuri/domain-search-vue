@@ -51,7 +51,7 @@ router.get("/test", async (req, res) => {
         await transporter.sendMail({
         from: '"Test Mailer" <test@example.com>',
       to: "test@example.com",
-      subject: "🚀 Test Email from Domain Tracker",
+      subject: "Test Email from Domain Tracker",
       text: "This is a test email from the backend route.",
       html: "<h3>This is a <span style='color:green;'>test email</span> sent via Mailpit !!!</h3>",
     });

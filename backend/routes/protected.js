@@ -2,7 +2,7 @@ const express = require('express');
 const verifyToken = require('../middlewares/auth');
 const router = express.Router();
 
-// Example protected route
+// protected route
 router.get('/me', verifyToken, (req, res) => {
   res.json({ message: 'Protected data', user: req.user });
 });

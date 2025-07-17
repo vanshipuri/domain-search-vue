@@ -41,21 +41,21 @@ router.post("/register", async (req, res) => {
 //  LOGIN
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  console.log("🟡 Login request for:", username);
+  console.log(" Login request for:", username);
 
   const user = repo.getUserByUsername(username);
-  console.log("🔍 Found user:", user);
+  console.log(" Found user:", user);
 
   if (!user) {
-    console.log("❌ User not found");
+    console.log(" User not found");
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
   const match = await bcrypt.compare(password, user.password);
-  console.log("🧪 Password match:", match);
+  console.log(" Password match:", match);
 
   if (!match) {
-    console.log("❌ Password does not match");
+    console.log(" Password does not match");
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
@@ -63,12 +63,12 @@ router.post("/login", async (req, res) => {
     expiresIn: "1h",
   });
 
-  console.log("✅ Login successful, token sent");
+  console.log(" Login successful, token sent");
   res.json({ token });
 });
 
 
-// ✅ Protected route example
+//  Protected route example
 router.get("/me", (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
