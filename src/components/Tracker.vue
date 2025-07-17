@@ -1,7 +1,5 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
-import { watchEffect } from "vue";
-
+import { defineProps, defineEmits, watchEffect } from "vue";
 
 const props = defineProps({
   tracked: {
@@ -10,17 +8,22 @@ const props = defineProps({
   },
 });
 
-// Prepare editable notifyDays input
+const emit = defineEmits([
+  "untrackDomain",
+  "updateEmail",
+  "manualNotify",
+  "updateNotifyDays",
+]);
+
 watchEffect(() => {
-  props.tracked.forEach(item => {
+  props.tracked.forEach((item) => {
     if (!item.notifyDaysInput) {
-      item.notifyDaysInput = (item.notifiedDays || []).join(","); // default
+      item.notifyDaysInput = (item.notifiedDays || []).join(",");
     }
   });
 });
 
 function confirmUntrack(domain) {
-  // 🚨 Just emit the event — App.vue will handle SweetAlert
   emit("untrackDomain", domain);
 }
 
@@ -29,214 +32,156 @@ function formatDate(dateString) {
   const dateOnly = new Date(dateString).toISOString().split("T")[0];
   return dateOnly;
 }
-
-const emit = defineEmits(["untrackDomain", "updateEmail", "manualNotify", "updateNotifyDays"]);
 </script>
 
 <template>
-  <div class="container-3 flex flex-col items-center justify-center">
-    <h3><b>Expiry Tracker</b></h3>
-    <table v-if="tracked.length">
-      <thead>
-        <tr>
-          <th>Sr.</th>
-          <th>Domain</th>
-          <th>Email</th>
-          <th>Notify Days</th>
-          <th>Expiry</th>
-          <th>Days Left</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(item, idx) in tracked" :key="item.domain">
-          <td>{{ idx + 1 }}</td>
-          <td class="dname">{{ item.domain }}</td>
-          <td class="dmail">
-            <input
-              type="email"
-              v-model="item.email"
-              @change="
-                emit('updateEmail', { domain: item.domain, email: item.email })
-              "
-              class="email-input"
-              placeholder="Enter email"
-            />
-          </td>
-          <td>
+  <div class="tracker-wrapper">
+    <h3 class="tracker-title">Expiry Tracker</h3>
+    <div class="responsive-table-wrapper">
+      <table v-if="tracked.length" class="tracker-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Domain</th>
+            <th>Email</th>
+            <th>Notify Days</th>
+            <th>Expiry</th>
+            <th>Days Left</th>
+            <th>Status</th>
+            <th colspan="2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, idx) in tracked" :key="item.domain">
+            <td>{{ idx + 1 }}</td>
+            <td class="domain">{{ item.domain }}</td>
+           <td>
+  <input
+    type="email"
+    v-model="item.email"
+    @change="emit('updateEmail', { domain: item.domain, email: item.email })"
+    placeholder="Enter email"
+    class="input email-input"
+  />
+</td>
+<td class="notify-cell">
   <input
     type="text"
     v-model="item.notifyDaysInput"
     @change="emit('updateNotifyDays', { domain: item.domain, notifyDays: item.notifyDaysInput })"
     placeholder="e.g. 30,14,7"
-    class="email-input"
+    class="input notify-input"
   />
 </td>
-          <td class="expdate">{{ formatDate(item.expiryDate) }}</td>
-          <td class="renewday">{{ item.daysLeft }}</td>
-          <td :class="item.status === 'Expired' ? 'expired' : 'active'">
-            {{ item.status }}
-          </td>
-          <td>
-            <button
-              @click="confirmUntrack(item.domain)"
-              class="track-untrack-button"
-            >
-              Untrack
-            </button>
-          </td>
-          <td>
-            <button
-              @click="emit('manualNotify', item)"
-              class="track-notify-button"
-            >
-              Notify
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div v-else>
-      <em>No tracked domains.</em>
+
+            
+            <td class="exp">{{ formatDate(item.expiryDate) }}</td>
+            <td class="days-left">{{ item.daysLeft }}</td>
+            <td :class="item.status === 'Expired' ? 'expired' : 'active'">
+              {{ item.status }}
+            </td>
+            <td>
+              <button class="btn untrack" @click="confirmUntrack(item.domain)">Untrack</button>
+            </td>
+            <td>
+              <button class="btn notify" @click="emit('manualNotify', item)">Notify</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div v-else class="empty-msg">
+        <em>No tracked domains.</em>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1.5rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
-  overflow: hidden;
+.tracker-wrapper {
+  width: 95%;
+  margin: 20px auto;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
 }
 
-th,
-td {
-  padding: 16px;
-  text-align: left;
+.tracker-title {
+  font-size: 1.5rem;
+  color: #4f46e5;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.responsive-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.tracker-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 768px;
 }
 
 thead {
-  background-color: #f3f4f6;
+  background-color: #f3f4f6; /* Grey header */
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  font-size: 14px;
-  color: #6b7280;
 }
 
-tbody tr {
+th, td {
+  padding: 10px 8px;
+  text-align: center;
   border-bottom: 1px solid #e5e7eb;
 }
 
-button {
-  padding: 8px 12px;
-  border-radius: 12px;
-  transition: 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-button:first-child {
-  background-color: #ef4444;
-  color: white;
-}
-
-button:first-child:hover {
-  background-color: #dc2626;
-}
-
-button:last-child {
-  background-color: #facc15;
-  color: white;
-}
-
-button:last-child:hover {
-  background-color: #eab308;
-}
-
-td.email {
-  color: #166534;
-  font-weight: 500;
-}
-
-td.expiry {
-  color: #dc2626;
+td.domain {
   font-weight: 600;
-}
-
-td.status {
-  color: #22c55e;
-  font-weight: bold;
-}
-
-.h3 {
-  text-align: center;
-  color: #2563eb;
-  font-size: 20px;
-}
-
-.track-untrack-button {
-  background-color: #b66565 !important;
-  color: #1d1e1f;
-  cursor: pointer;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-weight: 500;
-  margin: 4px 0;
-}
-
-.track-untrack-button:hover {
-  background-color: #b44646 !important;
-}
-
-.container-3 {
-  display: block;
-  margin: 0 auto;
-  max-height: fit-content;
-  width: 90% !important;
-  margin-top: 10px;
-  background-color: #f0f0f0;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.track-notify-button {
-  background-color: #c0be4a;
-  color: #1d1e1f;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  cursor: pointer;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-weight: 500;
-}
-
-.dname {
-  color: #1d1e1f;
-  font-size: 16px;
-}
-
-.expdate {
-  color: #c91e1e;
-  font-size: 14px;
-}
-
-.dmail {
-  color: #4b7522;
-  font-size: 14px;
+  color: #1f2937;
   word-break: break-word;
 }
 
-.renewday {
-  font-size: 15px;
-  text-align: center;
-  color: #1f1f1f;
+td.exp {
+  color: #c2410c;
   font-weight: 500;
+}
+
+td.days-left {
+  color: #1e40af;
+  font-weight: 500;
+}
+/* horizontal spacing specifically between Email and Notify cells */
+.email-input {
+  margin-right: 8px;
+}
+
+.notify-cell {
+  padding-left: 8px;
+}
+
+.input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  background-color: #ffffff;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .active {
@@ -247,5 +192,60 @@ td.status {
 .expired {
   color: red;
   font-weight: bold;
+}
+
+.btn {
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.untrack {
+  background-color: #ef4444;
+  color: white;
+}
+
+.untrack:hover {
+  background-color: #dc2626;
+}
+
+.notify {
+  background-color: #facc15;
+  color: #1f2937;
+}
+
+.notify:hover {
+  background-color: #eab308;
+}
+
+.empty-msg {
+  text-align: center;
+  padding: 20px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .tracker-wrapper {
+    padding: 12px;
+  }
+
+  .tracker-title {
+    font-size: 1.3rem;
+  }
+
+  .btn {
+    margin: 2px 0;
+    font-size: 0.7rem;
+  }
+
+  .input {
+    font-size: 0.75rem;
+    padding: 5px 7px;
+  }
 }
 </style>

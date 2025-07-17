@@ -1,87 +1,112 @@
 <script setup>
-import { defineProps , defineEmits} from 'vue';
+import { defineProps, defineEmits } from 'vue';
 const props = defineProps({
   isLoading: Boolean,
   searchError: String,
   searchResult: Object,
 });
-
-const emit = defineEmits (['track']);
+const emit = defineEmits(['track']);
 </script>
 
 <template>
-  <div class="container-1">
-    <h3 class="h3"><b>Search Results</b></h3>
-    <div class="Search-Results">
-      <div v-if="isLoading">
-            <div
-class="loadingio-eclipse">
-  <div class="ldio-rpinwye8j0b">
-    <div>
-    </div>
-  </div>
-</div>
-            
+  <div class="results-container">
+    
+
+    <div class="results-box">
+      <h3 class="title"><b>Search Results</b></h3>
+      <div v-if="isLoading" class="loader-container">
+        <div class="loadingio-eclipse">
+          <div class="ldio-rpinwye8j0b"><div></div></div>
+        </div>
       </div>
-      <div v-else-if="searchError" style="color: red;">{{ searchError }}</div>
-      <div v-else-if="searchResult && searchResult.WhoisRecord && searchResult.WhoisRecord.domainName">
-        <p style="text-align:left;">
-          <strong>Domain Name:</strong><br> {{ searchResult.WhoisRecord.domainName }}<br> <br>
-          <strong>Name Servers:</strong><br>
-          {{ searchResult.WhoisRecord.nameServers?.hostNames?.join(', ') || 'N/A' }}<br><br>
-          <strong>Registered On:</strong> <br>
-          {{ searchResult.WhoisRecord.createdDate || 'N/A' }}<br><br>
-          <strong>Expires On:</strong> <br> {{ searchResult.WhoisRecord.expiresDate || 'N/A' }}<br> <br>
-          <span>
-              <span style="color: #33383a"><b> Domain Updated On:</b> </span>
-              <br />
-              <span>
-                {{ searchResult?.WhoisRecord?.updatedDate || "N/A" }}</span
-              >
-            </span>
-            <br />
-            <br />
-            <span>
-              <span style="color: #33383a"><b>Domain Error:</b> </span>
-              <br />
-              <span> {{ searchResult?.WhoisRecord?.dataError || "N/A" }}</span>
-            </span>
+
+      <div v-else-if="searchError" class="error-msg">
+        {{ searchError }}
+      </div>
+
+      <div v-else-if="searchResult?.WhoisRecord?.domainName" class="info-block">
+        <p>
+          <strong>Domain Name:</strong><br /> {{ searchResult.WhoisRecord.domainName }}<br /><br />
+          <strong>Name Servers:</strong><br />
+          {{ searchResult.WhoisRecord.nameServers?.hostNames?.join(', ') || 'N/A' }}<br /><br />
+          <strong>Registered On:</strong><br />
+          {{ searchResult.WhoisRecord.createdDate || 'N/A' }}<br /><br />
+          <strong>Expires On:</strong><br /> {{ searchResult.WhoisRecord.expiresDate || 'N/A' }}<br /><br />
+          <strong>Updated On:</strong><br /> {{ searchResult.WhoisRecord.updatedDate || 'N/A' }}<br /><br />
+          <strong>Data Error:</strong><br /> {{ searchResult.WhoisRecord.dataError || 'N/A' }}
         </p>
       </div>
-      <div v-else-if="searchResult?.WhoisRecord?.dataError && searchResult?.WhoisRecord?.dataError !== 'MASKED_WHOIS_DATA'">
-        <template v-if="searchResult?.WhoisRecord?.dataError === 'NO_DATA'">
+
+      <div v-else-if="searchResult?.WhoisRecord?.dataError && searchResult?.WhoisRecord?.dataError !== 'MASKED_WHOIS_DATA'" class="info-block">
+        <p v-if="searchResult.WhoisRecord.dataError === 'NO_DATA'">
           This domain does not exist.
-        </template>
-        <template v-else>
+        </p>
+        <p v-else>
           This domain is not registered.
-        </template>
+        </p>
       </div>
-      <div v-else>
-        <p style="text-align:left;">
-          Eg:- Name: ABC.COM<br />
-          Domain Name: ABC.COM<br />
-          Domain Name Server: ns1.abc.com<br />
-          Domain Registered On: 1996-05-22T04:00:00Z <br />
-          Domain Expires On: 2026-05-23T04:00:00Z <br />
+
+      <div v-else class="info-block">
+        <p>
+          Eg:<br />
+          <strong>Domain:</strong> ABC.COM<br />
+          <strong>Server:</strong> ns1.abc.com<br />
+          <strong>Registered On:</strong> 1996-05-22T04:00:00Z<br />
+          <strong>Expires On:</strong> 2026-05-23T04:00:00Z
         </p>
       </div>
     </div>
   </div>
-  
 </template>
+
 <style scoped>
-
-.h3 {
-  text-align: center;
-  color:#2563eb;
-  font-size:20px;
-
+.results-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
+.title {
+  text-align: center;
+  color: #2563eb;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.results-box {
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1f2937;
+  word-wrap: break-word;
+}
+
+.results-box:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.error-msg {
+  color: red;
+  text-align: center;
+  font-weight: 500;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+}
+
+/* Loader Animation */
 @keyframes ldio-rpinwye8j0b {
-  0% { transform: rotate(0deg) }
-  50% { transform: rotate(180deg) }
-  100% { transform: rotate(360deg) }
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
 }
 .ldio-rpinwye8j0b div {
   position: absolute;
@@ -91,7 +116,7 @@ class="loadingio-eclipse">
   top: 20px;
   left: 20px;
   border-radius: 50%;
-  box-shadow: 0 4px 0 0 #e15b64;
+  box-shadow: 0 4px 0 0 #2563eb;
   transform-origin: 80px 82px;
 }
 .loadingio-eclipse {
@@ -106,29 +131,29 @@ class="loadingio-eclipse">
   position: relative;
   transform: translateZ(0) scale(1);
   backface-visibility: hidden;
-  transform-origin: 0 0; /* see note above */
 }
 .ldio-rpinwye8j0b div { box-sizing: content-box; }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+  .results-container {
+    padding: 16px;
+  }
 
-
-.h3 {
-  text-align: center;
+  .results-box {
+    font-size: 15px;
+    padding: 16px;
+  }
 }
 
+@media (max-width: 480px) {
+  .title {
+    font-size: 18px;
+  }
 
-
-.container-1 important {
-  text-align:left;
-  background-color: #f0f0f0; 
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  padding: 20px;
-  margin: 10px;
-  margin-bottom: 10px;
+  .results-box {
+    font-size: 14px;
+    padding: 12px;
+  }
 }
-.container-1:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
-}
-
 </style>

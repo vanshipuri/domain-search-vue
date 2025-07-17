@@ -6,47 +6,94 @@ const emit = defineEmits(['searchFromHistory']);
 </script>
 
 <template>
-<div class="container-2">
-    <h3 class="h3"><b>Previous Searches</b></h3>
-    <div class="History">
-      <span v-for="(item,index) in history" :key="index">
-        <a href="#" @click.prevent="emit('searchFromHistory', item)">
-            <p>{{ item }}</p>
-          <hr>
-        </a>
+  <div class="history-container">
+    <h3 class="history-heading"><b>Previous Searches</b></h3>
+
+    <div class="history-list">
+      <span
+        v-for="(item, index) in history"
+        :key="index"
+        @click.prevent="emit('searchFromHistory', item)"
+        class="history-item"
+      >
+        {{ item }}
+        <hr />
       </span>
     </div>
   </div>
 </template>
 
 <style scoped>
-.h3 {
+.history-container {
+  background-color: white;
+  padding: 20px 24px;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease-in-out;
+  margin: 16px auto;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.history-container:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.history-heading {
   text-align: center;
-  color:#2563eb;
-  font-size:20px;
-
+  color: #4338ca; /* Indigo-700 */
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 20px;
 }
 
-.container-2 {
-  width: 20%;
-  height: fit-content;
-  background-color: #f0f0f0; 
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
-.container-2:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
-}
-
-.History {
+.history-item {
   cursor: pointer;
-  font-size: 18px;
-  margin:10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  color: #1f2937;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  word-break: break-word;
 }
 
-.span{
-  margin: 10px;
+.history-item:hover {
+  background-color: #e0e7ff; /* Indigo-100 */
+  color: #3730a3; /* Indigo-800 */
+}
+
+hr {
+  margin-top: 6px;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Responsive tweaks */
+@media (max-width: 500px) {
+  .history-container {
+    padding: 16px;
+  }
+
+  .history-heading {
+    font-size: 1.15rem;
+  }
+
+  .history-item {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
 }
 </style>
+

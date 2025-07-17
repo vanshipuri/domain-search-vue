@@ -315,12 +315,13 @@ watch(
 </script>
 
 <template>
-  <div v-if="user">
+  <div v-if="user" class="app-wrapper">
     <AppHeader />
-    <!-- Logout button aligned to top-right -->
-<div style="text-align: right; margin: 10px 20px;">
-  <button @click="logout" class="logout-button">Logout</button>
-</div>
+
+    <!-- Logout button -->
+    <div class="logout-wrapper">
+      <button @click="logout" class="logout-button">Logout</button>
+    </div>
 
     <Form @search="handleSearch" />
 
@@ -334,9 +335,12 @@ watch(
       <History :history="history" @searchFromHistory="searchFromHistory" />
     </div>
 
-    <button @click="trackResult" class="track-expiry-button">
-      Track Domain Expiry
-    </button>
+    <!-- Track Expiry Button Centered -->
+    <div class="track-button-wrapper">
+      <button @click="trackResult" class="track-expiry-button">
+        Track Domain Expiry
+      </button>
+    </div>
 
     <Tracker
       :tracked="tracked"
@@ -355,149 +359,137 @@ watch(
     <p style="text-align: center; padding-top: 40px;">Loading...</p>
   </div>
 </template>
+
   
 
 <style scoped>
-.main-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  margin-top: 20px;
-  text-align: left;
-}
-.container-1 {
-  text-align: left;
-  width: 50%;
-  background-color: #f0f0f0;
+.app-wrapper {
+  position: relative;
   padding: 20px;
-  margin-right: 10px;
-  border-radius: 8px;
-}
-.container-1:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
-}
-.container-2 {
-  width: 30%;
-  background-color: #f0f0f0;
-  padding: 20px;
-  border-radius: 8px;
 }
 
-.container-2:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
-}
-
-.container-3 {
-  display: block;
-  margin: 0 auto;
-  width: 50%;
-  margin-top: 10px;
-  background-color: #f0f0f0;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.container-3:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.397);
+.logout-wrapper {
+  position: absolute;
+  top: 20px;
+  right: 20px;
 }
 
 .logout-button {
-  background-color: #f87171; /* red */
+  background-color: #f87171;
   color: white;
   border: none;
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
 }
+
 .logout-button:hover {
   background-color: #ef4444;
 }
 
-
-.dname {
-  color: #1d1e1f;
-  font-size: 20px;
-}
-
-.expdate {
-  color: #ff0000;
-  font-size: 14px;
-  text-decoration: underline;
-}
-
-.History {
-  cursor: pointer;
-}
-
-.h3 {
-  text-align: left;
-}
-
-.submit {
-  padding: 16px 18px;
-  margin-left: 20px;
-  background-color: black;
-  color: white;
-  border: 1px solid white;
-  border-radius: 5px;
-  cursor: pointer;
-  box-shadow: 1px 1px 5px rgba(14, 14, 14, 0.356);
-}
-
-.submit:hover {
-  background-color: white;
-  color: black;
-  border: 1px solid black;
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.356);
-}
-
-.submit i {
-  margin-right: 8px;
-}
-
-.form {
-  display: block;
-  margin: auto;
+.main-container {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  margin-top: 90px;
-  padding: 30px;
-  gap: 4px;
+  gap: 20px;
+  margin-top: 30px;
 }
 
-input[type="text"] {
-  padding: 18px;
-  width: 300px;
-}
-
-input[type="text"]:focus {
-  outline: none;
-  border: 2px solid #5c4d4d;
-  box-shadow: 0 0 5px #332b2b;
-}
-
-::placeholder {
-  color: #41171754;
-  font-style: italic;
-  font-size: 1.25em;
-}
-
-.History {
-  cursor: pointer;
+.track-button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .track-expiry-button {
   background-color: #3d67f0;
   color: #f0f2f5;
-  margin-top: 10px;
-  padding: 15px;
+  padding: 15px 24px;
   border: 1px solid #3d67f0;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .track-expiry-button:hover {
   background-color: #5369af;
   color: #e3e7eb;
 }
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .logout-wrapper {
+    position: static;
+    text-align: right;
+    margin-bottom: 10px;
+  }
+
+  .main-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .track-expiry-button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+.main-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 30px;
+  padding: 0 10px;
+}
+
+/* Ensure child containers are sized properly */
+.container-1 {
+  flex: 1 1 60%;
+  min-width: 300px;
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.container-2 {
+  flex: 1 1 35%;
+  min-width: 280px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Hover styles */
+.container-1:hover,
+.container-2:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .container-1,
+  .container-2 {
+    width: 100%;
+  }
+}
+.h3 {
+  margin-bottom: 12px;
+  font-size: 20px;
+  color: #4f46e5;
+  text-align: center;
+}
+
 </style>
