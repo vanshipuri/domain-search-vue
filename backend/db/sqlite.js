@@ -15,6 +15,16 @@ db.prepare(`
 class TrackedRepository {
   constructor() {
     this.db = db;
+
+    // ✅ CREATE users table inside the constructor
+    this.db.prepare(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        email TEXT,
+        password TEXT
+      )
+    `).run();
   }
 
   getAll() {
@@ -22,26 +32,25 @@ class TrackedRepository {
   }
 
   save(domain, email, expiryDate, notified = 0, notifiedDays = []) {
-    try{
-    return this.db
-      .prepare(
-        `INSERT OR REPLACE INTO tracked_domains 
-        (domain, email, expiryDate, notified, notifiedDays)
-        VALUES (?, ?, ?, ?, ?)
-      `)
-      .run(domain, email, expiryDate, notified, JSON.stringify(notifiedDays));
+    try {
+      return this.db
+        .prepare(
+          `INSERT OR REPLACE INTO tracked_domains 
+            (domain, email, expiryDate, notified, notifiedDays)
+            VALUES (?, ?, ?, ?, ?)`
+        )
+        .run(domain, email, expiryDate, notified, JSON.stringify(notifiedDays));
     } catch (err) {
-      console.error(" DB save error:", err.message);
+      console.error("DB save error:", err.message);
       throw err;
     }
   }
-  
-  getByDomain(domain) {
-  return this.db
-    .prepare("SELECT * FROM tracked_domains WHERE domain = ?")
-    .get(domain);
-}
 
+  getByDomain(domain) {
+    return this.db
+      .prepare("SELECT * FROM tracked_domains WHERE domain = ?")
+      .get(domain);
+  }
 
   delete(domain) {
     return this.db
@@ -60,6 +69,19 @@ class TrackedRepository {
       .prepare("UPDATE tracked_domains SET notifiedDays = ? WHERE domain = ?")
       .run(JSON.stringify(notifiedDays), domain);
   }
+  
+  getUserByUsername(username) {
+  return this.db
+    .prepare("SELECT * FROM users WHERE username = ?")
+    .get(username);
+}
+
+createUser(username, email, hashedPassword) {
+  return this.db
+    .prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")
+    .run(username, email, hashedPassword);
+}
+
 }
 
 module.exports = TrackedRepository;
