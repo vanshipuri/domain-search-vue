@@ -9,62 +9,47 @@ const repo = new Tracked();
 
 const SECRET_KEY = process.env.JWT_SECRET || "your_fallback_secret"; // Optional fallback
 
-// REGISTER
-router.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
-
-  console.log("Incoming register:", { username, email, password });
-
-  if (!username || !email || !password) {
-    console.log(" Missing fields");
-    return res.status(400).json({ error: "All fields are required" });
-  }
-
-  const existingUser = repo.getUserByUsername(username);
-  if (existingUser) {
-    console.log(" User already exists:", username);
-    return res.status(409).json({ error: "User already exists" });
-  }
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    repo.createUser(username, email, hashedPassword);
-    console.log(" User registered:", username);
-    return res.json({ message: "User registered successfully" });
-  } catch (err) {
-    console.error(" Error inserting user:", err.message);
-    return res.status(500).json({ error: "Error creating user" });
-  }
-});
-
-
-//  LOGIN
+//login or register user
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  console.log(" Login request for:", username);
+  console.log("Login request for:", username);
 
-  const user = repo.getUserByUsername(username);
-  console.log(" Found user:", user);
+  try {
+    const user = repo.getUserByUsername(username);
+    console.log("Found user:", user);
 
-  if (!user) {
-    console.log(" User not found");
-    return res.status(401).json({ error: "Invalid credentials" });
+    if (user) {
+      const match = await bcrypt.compare(password, user.password);
+      console.log("Password match:", match);
+
+      if (match) {
+        const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, {
+          expiresIn: "1h",
+        });
+        console.log("Login successful, token sent");
+        return res.json({ token });
+      } else {
+        console.log("Password does not match");
+        return res.status(409).json({ error: "Username already exists. Please choose a different one." });
+      }
+    }
+
+    // If user doesn't exist, register
+    const hashedPassword = await bcrypt.hash(password, 10);
+    repo.createUser(username, "", hashedPassword);
+    console.log("User registered:", username);
+
+    const newUser = repo.getUserByUsername(username);
+    const token = jwt.sign({ id: newUser.id, username: newUser.username }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    console.log("Registration successful, token sent");
+    res.json({ token });
+
+  } catch (err) {
+    console.error("Login/Register error:", err.message);
+    res.status(500).json({ error: "Something went wrong" });
   }
-
-  const match = await bcrypt.compare(password, user.password);
-  console.log(" Password match:", match);
-
-  if (!match) {
-    console.log(" Password does not match");
-    return res.status(401).json({ error: "Invalid credentials" });
-  }
-
-  const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, {
-    expiresIn: "1h",
-  });
-
-  console.log(" Login successful, token sent");
-  res.json({ token });
 });
 
 

@@ -19,9 +19,7 @@ const router = useRouter();
 function goToLogin() {
   router.push('/login');
 }
-function goToRegister() {
-  router.push('/register');
-}
+
 </script>
 
 <style scoped>

@@ -30,11 +30,7 @@
                 required
               />
             </div>
-            <button type="submit" class="login-button">Login</button>
-            <p class="login-footer">
-              Don’t have an account yet?
-              <router-link to="/register" class="login-link">Register</router-link>
-            </p>
+            <button type="submit" class="login-button">Continue</button>
             <p v-if="error" class="login-error">{{ error }}</p>
           </form>
         </div>
@@ -44,28 +40,78 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
-const username = ref('')
-const password = ref('')
-const error = ref('')
-const router = useRouter()
+const username = ref('');
+const password = ref('');
+const error = ref('');
+const router = useRouter();
 
 async function handleLogin() {
   try {
+    // Attempt to login
     const res = await axios.post('http://localhost:5000/api/login', {
       username: username.value,
       password: password.value
-    })
+    });
 
-    const token = res.data.token
-    localStorage.setItem('token', token)
-    router.push("/app")
+    // ✅ Login successful
+    const token = res.data.token;
+    localStorage.setItem('token', token);
+    router.push("/app");
+
   } catch (err) {
-    console.error("Login failed:", err)
-    error.value = 'Login failed. Check credentials.'
+    const status = err?.response?.status;
+
+    if (status === 404) {
+      // 🆕 Username not found → ask to register
+      const confirm = await Swal.fire({
+        title: 'User Not Found',
+        text: `Do you want to register as "${username.value}"?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Register',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (confirm.isConfirmed) {
+        try {
+          const fakeEmail = `${username.value}@example.com`; // Can be anything
+          await axios.post('http://localhost:5000/api/register', {
+            username: username.value,
+            password: password.value,
+            email: fakeEmail
+          });
+
+          // Auto-login after register
+          const loginRes = await axios.post('http://localhost:5000/api/login', {
+            username: username.value,
+            password: password.value
+          });
+
+          localStorage.setItem('token', loginRes.data.token);
+          router.push("/app");
+
+        } catch (registerErr) {
+          error.value = "Registration failed. Try a different username.";
+        }
+      }
+
+    } else if (status === 409) {
+      // ❌ Username exists but password is wrong
+      Swal.fire({
+        icon: 'error',
+        title: 'Username Exists',
+        text: 'But the password is incorrect. Please choose a different username.',
+      });
+
+    } else {
+      error.value = 'Unexpected error. Please try again.';
+      console.error("Login failed:", err);
+    }
   }
 }
 </script>
