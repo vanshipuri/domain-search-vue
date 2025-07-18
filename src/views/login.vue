@@ -58,16 +58,25 @@ async function handleLogin() {
       password: password.value
     });
 
-    // ✅ Login successful
+    // Login successful
     const token = res.data.token;
+    const isNewUser = res.data.isNewUser; 
     localStorage.setItem('token', token);
-    router.push("/app");
-
-  } catch (err) {
+     Swal.fire({
+      icon: 'success',
+      title: isNewUser ? 'Welcome!' : 'Welcome back!',
+      text: isNewUser
+        ? `Hi ${username.value}, your account has been created.`
+        : `Hi ${username.value}, glad to see you again!`,
+      confirmButtonColor: '#2563eb',
+    }).then(() => {
+      router.push('/app');
+    });
+  }catch (err) {
     const status = err?.response?.status;
 
     if (status === 404) {
-      // 🆕 Username not found → ask to register
+      // Username not found → ask to register
       const confirm = await Swal.fire({
         title: 'User Not Found',
         text: `Do you want to register as "${username.value}"?`,
@@ -101,7 +110,7 @@ async function handleLogin() {
       }
 
     } else if (status === 409) {
-      // ❌ Username exists but password is wrong
+      // Username exists but password is wrong
       Swal.fire({
         icon: 'error',
         title: 'Username Exists',

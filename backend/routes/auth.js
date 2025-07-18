@@ -27,7 +27,7 @@ router.post("/login", async (req, res) => {
           expiresIn: "1h",
         });
         console.log("Login successful, token sent");
-        return res.json({ token });
+         return res.json({ token, isNewUser: false });  // Returning user
       } else {
         console.log("Password does not match");
         return res.status(409).json({ error: "Username already exists. Please choose a different one." });
@@ -44,9 +44,8 @@ router.post("/login", async (req, res) => {
       expiresIn: "1h",
     });
     console.log("Registration successful, token sent");
-    res.json({ token });
-
-  } catch (err) {
+     res.json({ token, isNewUser: true });  //  New user
+  }catch (err) {
     console.error("Login/Register error:", err.message);
     res.status(500).json({ error: "Something went wrong" });
   }
