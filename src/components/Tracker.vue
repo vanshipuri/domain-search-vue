@@ -55,36 +55,49 @@ function formatDate(dateString) {
           <tr v-for="(item, idx) in tracked" :key="item.domain">
             <td>{{ idx + 1 }}</td>
             <td class="domain">{{ item.domain }}</td>
-           <td>
-  <input
-    type="email"
-    v-model="item.email"
-    @change="emit('updateEmail', { domain: item.domain, email: item.email })"
-    placeholder="Enter email"
-    class="input email-input"
-  />
-</td>
-<td class="notify-cell">
-  <input
-    type="text"
-    v-model="item.notifyDaysInput"
-    @change="emit('updateNotifyDays', { domain: item.domain, notifyDays: item.notifyDaysInput })"
-    placeholder="e.g. 30,14,7"
-    class="input notify-input"
-  />
-</td>
+            <td>
+              <input
+                type="email"
+                v-model="item.email"
+                @change="
+                  emit('updateEmail', {
+                    domain: item.domain,
+                    email: item.email,
+                  })
+                "
+                placeholder="Enter email"
+                class="input email-input"
+              />
+            </td>
+            <td class="notify-cell">
+              <input
+                type="text"
+                v-model="item.notifyDaysInput"
+                @change="
+                  emit('updateNotifyDays', {
+                    domain: item.domain,
+                    notifyDays: item.notifyDaysInput,
+                  })
+                "
+                placeholder="e.g. 30,14,7"
+                class="input notify-input"
+              />
+            </td>
 
-            
             <td class="exp">{{ formatDate(item.expiryDate) }}</td>
             <td class="days-left">{{ item.daysLeft }}</td>
             <td :class="item.status === 'Expired' ? 'expired' : 'active'">
               {{ item.status }}
             </td>
             <td>
-              <button class="btn untrack" @click="confirmUntrack(item.domain)">Untrack</button>
+              <button class="btn untrack" @click="confirmUntrack(item.domain)">
+                Untrack
+              </button>
             </td>
             <td>
-              <button class="btn notify" @click="emit('manualNotify', item)">Notify</button>
+              <button class="btn notify" @click="emit('manualNotify', item)">
+                Notify
+              </button>
             </td>
           </tr>
         </tbody>
@@ -139,7 +152,8 @@ thead {
   text-transform: uppercase;
 }
 
-th, td {
+th,
+td {
   padding: 10px 8px;
   text-align: center;
   border-bottom: 1px solid #e5e7eb;

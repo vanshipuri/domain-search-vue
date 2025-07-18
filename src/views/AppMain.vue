@@ -42,7 +42,7 @@ onMounted(async () => {
   await loadTrackedDomainsFromBackend();
 
   } catch (err) {
-   console.error("Auth check failed:", err.response?.data || err.message); // Optional: add this
+   console.error("Auth check failed:", err.response?.data || err.message);
     error.value = "Session expired. Redirecting to login...";
     localStorage.removeItem("token");
     setTimeout(() => router.push("/login"), 1500);
@@ -129,15 +129,28 @@ async function saveTrackedDomainToBackend(domainObj) {
     await axios.post("http://localhost:5000/api/track", {
       ...domainObj,
       notifiedDays: domainObj.notifiedDays || [],
+    }, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
     });
   } catch (error) {
     console.error("Error saving domain:", error);
+    Swal.fire("Error", "Could not save domain to server.", "error");
   }
 }
 
+
 async function loadTrackedDomainsFromBackend() {
   try {
-    const response = await axios.get("http://localhost:5000/api/track");
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get("http://localhost:5000/api/track", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     tracked.value = response.data.map((item) => {
       const daysLeft = computeDaysLeft(item.expiryDate);
       const status = daysLeft === "Expired" ? "Expired" : "Active";
@@ -152,6 +165,7 @@ async function loadTrackedDomainsFromBackend() {
     console.error("Error loading tracked domains:", error);
   }
 }
+
 
 async function notifyUser(item) {
   const notifyDays = item.notifyDaysInput
@@ -247,6 +261,14 @@ function computeDaysLeft(expiryDate) {
 
 function updateNotifyDays({ domain, notifyDays }) {
   const item = tracked.value.find((d) => d.domain === domain);
+  console.log(
+    "updateNotifyDays called for domain:",
+    domain,
+    "with notifyDays:",
+    notifyDays,
+    " and matched item:",
+    item
+  );
   if (item) {
     item.notifiedDays = notifyDays
       .split(",")
@@ -364,8 +386,6 @@ function searchFromHistory(domain) {
     <p style="text-align: center; padding-top: 40px;">Loading...</p>
   </div>
 </template>
-
-  
 
 <style scoped>
 .app-wrapper {
@@ -495,5 +515,4 @@ function searchFromHistory(domain) {
   color: #4f46e5;
   text-align: center;
 }
-
 </style>

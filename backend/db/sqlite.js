@@ -34,6 +34,21 @@ class TrackedRepository {
         query TEXT NOT NULL
       )
     `).run();
+
+    // Expiry tracker table
+this.db.prepare(`
+  CREATE TABLE IF NOT EXISTS expiry_tracker (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    domain TEXT NOT NULL,
+    email TEXT,
+    expiryDate TEXT,
+    notified INTEGER DEFAULT 0,
+    notifiedDays TEXT DEFAULT '[]',
+    UNIQUE(username, domain)
+  )
+`).run();
+
   }
 
   getAll() {
@@ -49,6 +64,30 @@ class TrackedRepository {
       )
       .run(domain, email, expiryDate, notified, JSON.stringify(notifiedDays));
   }
+
+ 
+saveDomainForUser(username, domain, email, expiryDate, notified = 0, notifiedDays = []) {
+  return this.db.prepare(`
+    INSERT OR REPLACE INTO expiry_tracker 
+    (username, domain, email, expiryDate, notified, notifiedDays)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(username, domain, email, expiryDate, notified, JSON.stringify(notifiedDays));
+}
+
+
+getAllByUser(username) {
+  return this.db.prepare(`
+    SELECT * FROM expiry_tracker WHERE username = ?
+  `).all(username);
+}
+
+
+deleteDomainForUser(username, domain) {
+  return this.db.prepare(`
+    DELETE FROM expiry_tracker WHERE username = ? AND domain = ?
+  `).run(username, domain);
+}
+
 
   getByDomain(domain) {
     return this.db
@@ -100,6 +139,37 @@ class TrackedRepository {
       .all(username);
     return rows.map((r) => r.query);
   }
+
+  saveTrackedDomainForUser(username, domain, email, expiryDate, notified = 0, notifiedDays = []) {
+  return this.db.prepare(`
+    INSERT OR REPLACE INTO expiry_tracker
+    (username, domain, email, expiryDate, notified, notifiedDays)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(username, domain, email, expiryDate, notified, JSON.stringify(notifiedDays));
+}
+
+getTrackedDomainsByUser(username) {
+  return this.db.prepare(`
+    SELECT * FROM expiry_tracker
+    WHERE username = ?
+  `).all(username);
+}
+
+deleteTrackedDomain(username, domain) {
+  return this.db.prepare(`
+    DELETE FROM expiry_tracker
+    WHERE username = ? AND domain = ?
+  `).run(username, domain);
+}
+
+updateTrackedEmailOrNotify(username, domain, email, notifiedDays) {
+  return this.db.prepare(`
+    UPDATE expiry_tracker
+    SET email = ?, notifiedDays = ?
+    WHERE username = ? AND domain = ?
+  `).run(email, JSON.stringify(notifiedDays), username, domain);
+}
+
 }
 
 module.exports = TrackedRepository;
