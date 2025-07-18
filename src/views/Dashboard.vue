@@ -7,8 +7,7 @@
       </p>
       <div class="dashboard-buttons">
         <button @click="goToLogin" class="btn btn-login">Login</button>
-        <button @click="goToRegister" class="btn btn-register">Register</button>
-      </div>
+       </div>
     </div>
   </section>
 </template>

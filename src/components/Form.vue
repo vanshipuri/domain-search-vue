@@ -1,10 +1,29 @@
 <script setup>
-import { defineEmits, ref } from 'vue';
+import { ref } from 'vue';
+import axios from 'axios';
+
 const emit = defineEmits(['search']);
 const domainName = ref('');
 
-function onSubmit() {
-  emit('search', domainName.value.trim());
+async function onSubmit() {
+  const query = domainName.value.trim();
+  if (!query) return;
+
+  emit('search', query);
+
+  // Save search history to backend
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post("http://localhost:5000/api/history", { query }, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
+  } catch (err) {
+    console.error("Error saving history:", err.response?.data || err.message);
+  }
+
   domainName.value = '';
 }
 </script>
@@ -33,7 +52,7 @@ function onSubmit() {
   justify-content: center;
   padding: 0 24px; /* removed top/bottom padding */
   min-height: 40vh; /* enough space without margin */
-  background-color: #f9fafb;
+  background-color: #ffffff;
 }
 
 .form {
@@ -77,7 +96,7 @@ input[type="text"]:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 12px 12px;
   background-color: #4f46e5;
   color: white;
   border: 1px solid #4f46e5;
@@ -86,7 +105,7 @@ input[type="text"]:focus {
   cursor: pointer;
   transition: all 0.3s ease-in-out;
   width: 100%;
-  max-width: 160px;
+  max-width: 100px;
   text-align: center;
 }
 

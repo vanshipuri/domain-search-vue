@@ -5,7 +5,7 @@ const router = express.Router();
 require('dotenv').config();
 
 const Tracked = require('../db/sqlite');
-const repo = new Tracked(); //  Initialize repo
+const repo = new Tracked();
 
 const SECRET_KEY = process.env.JWT_SECRET || "your_fallback_secret"; // Optional fallback
 

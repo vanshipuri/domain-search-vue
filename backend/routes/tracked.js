@@ -1,8 +1,9 @@
 const express = require("express");
 const Tracked = require("../db/sqlite");
-
 const router = express.Router();
 const repo = new Tracked();
+const auth = require("../middlewares/auth"); 
+
 
 // GET all tracked domains
 router.get("/", (req, res) => {
@@ -29,6 +30,7 @@ router.post("/", (req, res) => {
   }
 });
 
+
 // DELETE a domain from tracking
 router.delete("/:domain", (req, res) => {
   try {
@@ -39,8 +41,7 @@ router.delete("/:domain", (req, res) => {
   }
 });
 
-// PATCH update the email
-// PATCH: update email and optionally notifiedDays
+// PATCH update email and optionally notifiedDays
 router.patch("/email", (req, res) => {
   const { domain, email, notifiedDays } = req.body;
 
@@ -49,15 +50,8 @@ router.patch("/email", (req, res) => {
   }
 
   try {
-    // Update email
-    if (email) {
-      repo.updateEmail(domain, email);
-    }
-
-    // Update notifiedDays if provided
-    if (Array.isArray(notifiedDays)) {
-      repo.updateNotifiedDays(domain, notifiedDays);
-    }
+    if (email) repo.updateEmail(domain, email);
+    if (Array.isArray(notifiedDays)) repo.updateNotifiedDays(domain, notifiedDays);
 
     res.json({ success: true });
   } catch (err) {
@@ -66,5 +60,5 @@ router.patch("/email", (req, res) => {
   }
 });
 
-
 module.exports = router;
+

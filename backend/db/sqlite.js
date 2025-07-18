@@ -4,7 +4,7 @@ const db = new Database("domains.db");
 db.prepare(`
   CREATE TABLE IF NOT EXISTS tracked_domains (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    domain TEXT UNIQUE,
+    domain TEXT,
     email TEXT,
     expiryDate TEXT,
     notified INTEGER DEFAULT 0,
@@ -16,13 +16,22 @@ class TrackedRepository {
   constructor() {
     this.db = db;
 
-    // ✅ CREATE users table inside the constructor
+    // USERS table
     this.db.prepare(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         email TEXT,
         password TEXT
+      )
+    `).run();
+
+    // HISTORY table
+    this.db.prepare(`
+      CREATE TABLE IF NOT EXISTS history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        query TEXT NOT NULL
       )
     `).run();
   }
@@ -32,18 +41,13 @@ class TrackedRepository {
   }
 
   save(domain, email, expiryDate, notified = 0, notifiedDays = []) {
-    try {
-      return this.db
-        .prepare(
-          `INSERT OR REPLACE INTO tracked_domains 
-            (domain, email, expiryDate, notified, notifiedDays)
-            VALUES (?, ?, ?, ?, ?)`
-        )
-        .run(domain, email, expiryDate, notified, JSON.stringify(notifiedDays));
-    } catch (err) {
-      console.error("DB save error:", err.message);
-      throw err;
-    }
+    return this.db
+      .prepare(
+        `INSERT OR REPLACE INTO tracked_domains 
+          (domain, email, expiryDate, notified, notifiedDays)
+         VALUES (?, ?, ?, ?, ?)`
+      )
+      .run(domain, email, expiryDate, notified, JSON.stringify(notifiedDays));
   }
 
   getByDomain(domain) {
@@ -69,19 +73,33 @@ class TrackedRepository {
       .prepare("UPDATE tracked_domains SET notifiedDays = ? WHERE domain = ?")
       .run(JSON.stringify(notifiedDays), domain);
   }
-  
+
+  //  User auth methods
   getUserByUsername(username) {
-  return this.db
-    .prepare("SELECT * FROM users WHERE username = ?")
-    .get(username);
-}
+    return this.db
+      .prepare("SELECT * FROM users WHERE username = ?")
+      .get(username);
+  }
 
-createUser(username, email, hashedPassword) {
-  return this.db
-    .prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")
-    .run(username, email, hashedPassword);
-}
+  createUser(username, email, hashedPassword) {
+    return this.db
+      .prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")
+      .run(username, email, hashedPassword);
+  }
 
+  //  History methods (per user)
+  saveHistory(username, query) {
+    return this.db
+      .prepare("INSERT INTO history (username, query) VALUES (?, ?)")
+      .run(username, query);
+  }
+
+  getHistoryByUser(username) {
+    const rows = this.db
+      .prepare("SELECT query FROM history WHERE username = ? ORDER BY id DESC LIMIT 10")
+      .all(username);
+    return rows.map((r) => r.query);
+  }
 }
 
 module.exports = TrackedRepository;

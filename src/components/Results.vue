@@ -69,7 +69,7 @@ const emit = defineEmits(['track']);
 
 .title {
   text-align: center;
-  color: #2563eb;
+  color: #3730a3;
   font-size: 22px;
   margin-bottom: 20px;
 }

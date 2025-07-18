@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import AppHeader from "../components/AppHeader.vue";
 import Form from "../components/Form.vue";
@@ -21,35 +21,32 @@ const history = ref([]);
 const localStorageKey = "history";
 
 
-
 onMounted(async () => {
   const token = localStorage.getItem("token");
-  
+
   if (!token) {
     router.push("/login");
     return;
   }
 
   try {
-    const res = await axios.get("http://localhost:5000/api/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await axios.get("http://localhost:5000/api/me", {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    user.value = res.data.user;
+
+    user.value = response.data.user;
+
+   
+    await loadUserHistory();
+
+  await loadTrackedDomainsFromBackend();
+
   } catch (err) {
+   console.error("Auth check failed:", err.response?.data || err.message); // Optional: add this
     error.value = "Session expired. Redirecting to login...";
     localStorage.removeItem("token");
     setTimeout(() => router.push("/login"), 1500);
-    return;
   }
-
-  const storedHistory = localStorage.getItem(localStorageKey);
-  if (storedHistory) {
-    history.value = JSON.parse(storedHistory);
-  }
-
-  await loadTrackedDomainsFromBackend();
 });
 
 
@@ -258,6 +255,21 @@ function updateNotifyDays({ domain, notifyDays }) {
   }
 }
 
+async function loadUserHistory() {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get("http://localhost:5000/api/history", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    history.value = response.data.history || [];
+  } catch (err) {
+    console.error("Failed to load user history:", err.message);
+  }
+}
+
 
 async function fetchWhoisData(domain) {
   isLoading.value = true;
@@ -293,10 +305,10 @@ function appendSearchToHistory(domain) {
 }
 
 
-function handleSearch(domain) {
+async function handleSearch(domain) {
   if (domain) {
-    fetchWhoisData(domain);
-    appendSearchToHistory(domain);
+    await fetchWhoisData(domain);
+    await appendSearchToHistory(domain);
   }
 }
 
@@ -305,13 +317,6 @@ function searchFromHistory(domain) {
   fetchWhoisData(domain);
 }
 
-watch(
-  history,
-  (newValue) => {
-    localStorage.setItem(localStorageKey, JSON.stringify(newValue));
-  },
-  { deep: true }
-);
 </script>
 
 <template>
@@ -403,7 +408,7 @@ watch(
 }
 
 .track-expiry-button {
-  background-color: #3d67f0;
+  background-color: #4f46e5;
   color: #f0f2f5;
   padding: 15px 24px;
   border: 1px solid #3d67f0;
@@ -414,7 +419,7 @@ watch(
 }
 
 .track-expiry-button:hover {
-  background-color: #5369af;
+  background-color: #3b3ac9;
   color: #e3e7eb;
 }
 
@@ -447,7 +452,6 @@ watch(
   padding: 0 10px;
 }
 
-/* Ensure child containers are sized properly */
 .container-1 {
   flex: 1 1 60%;
   min-width: 300px;

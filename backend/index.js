@@ -7,6 +7,7 @@ const trackedRoutes = require("./routes/tracked");
 const notifyRoutes = require("./routes/notify");
 const runDailyNotifier = require("./cron/notifyCron");
 const authRoutes = require('./routes/auth');
+const historyRoutes = require('./routes/history'); 
 const protectedRoutes = require('./routes/protected');
 
 const app = express();
@@ -19,6 +20,7 @@ app.use("/api/track", trackedRoutes);
 app.use("/api/whois", whoisapi);
 app.use("/api/notify", notifyRoutes);
 app.use('/api', authRoutes);
+app.use("/api", historyRoutes);
 app.use('/api', protectedRoutes);
 
 
