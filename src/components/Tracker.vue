@@ -117,13 +117,17 @@ function formatDate(dateString) {
   padding: 16px;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.082);
   overflow-x: auto;
+}
+
+.tracker-wrapper:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.233);
 }
 
 .tracker-title {
   font-size: 1.5rem;
-  color: #4f46e5;
+  color: #4338ca;
   font-weight: 700;
   text-align: center;
   margin-bottom: 16px;
@@ -133,8 +137,46 @@ function formatDate(dateString) {
   overflow-x: auto;
   width: 100%;
 }
-
 .tracker-table {
+  width: 100%;
+  margin-top: 2rem;
+  border-collapse: collapse;
+  font-family: 'Segoe UI', sans-serif;
+}
+.tracker-table th, .tracker-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+.tracker-table th {
+  background-color: #ede9fe;
+  color: #4f46e5;
+  font-weight: bold;
+}
+.tracker-table td {
+  font-size: 0.9rem;
+}
+.status-active {
+  color: green;
+  font-weight: bold;
+}
+.action-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.untrack-btn {
+  background-color: #ef4444;
+  color: white;
+}
+.notify-btn {
+  background-color: #facc15;
+  color: #1f2937;
+}
+
+
+/*.tracker-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.85rem;
@@ -146,7 +188,7 @@ function formatDate(dateString) {
 
 thead {
   background-color: #f3f4f6; /* Grey header */
-  font-weight: 600;
+  /*font-weight: 600;
   color: #374151;
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -158,7 +200,7 @@ td {
   text-align: center;
   border-bottom: 1px solid #e5e7eb;
 }
-
+*/
 td.domain {
   font-weight: 600;
   color: #1f2937;

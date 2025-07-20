@@ -162,14 +162,14 @@ deleteTrackedDomain(username, domain) {
   `).run(username, domain);
 }
 
-updateTrackedEmailOrNotify(username, domain, email, notifiedDays) {
+updateTrackedEmail(username, domain, email, notifiedDays) {
   return this.db.prepare(`
-    UPDATE expiry_tracker
+    UPDATE expiry_tracker 
     SET email = ?, notifiedDays = ?
     WHERE username = ? AND domain = ?
   `).run(email, JSON.stringify(notifiedDays), username, domain);
 }
-
 }
+
 
 module.exports = TrackedRepository;

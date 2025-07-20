@@ -48,13 +48,41 @@ async function onSubmit() {
 <style scoped>
 .form-container {
   display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.search-input {
+  padding: 0.75rem 1rem;
+  width: 350px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+}
+
+.submit {
+  background-color: #4f46e5;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.submit:hover {
+  background-color: #4338ca;
+}
+
+/*.form-container {
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 24px; /* removed top/bottom padding */
-  min-height: 40vh; /* enough space without margin */
-  background-color: #ffffff;
-}
-
+  /*min-height: 40vh; /* enough space without margin */
+ /* background-color: #ffffff;
+}*/
 .form {
   display: flex;
   flex-direction: column;
@@ -92,7 +120,7 @@ input[type="text"]:focus {
   font-style: italic;
 }
 
-.submit {
+/*.submit {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -112,5 +140,5 @@ input[type="text"]:focus {
 .submit:hover {
   background-color: #3b3ac9;
   border-color: #3b3ac9;
-}
+}*/
 </style>

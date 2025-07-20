@@ -158,6 +158,7 @@ async function loadTrackedDomainsFromBackend() {
         ...item,
         daysLeft: typeof daysLeft === "string" ? daysLeft : parseInt(daysLeft),
         notifiedDays: Array.isArray(item.notifiedDays) ? item.notifiedDays.map(Number) : [],
+        notifyDaysInput: "", 
         status,
       };
     });
@@ -166,8 +167,10 @@ async function loadTrackedDomainsFromBackend() {
   }
 }
 
-
 async function notifyUser(item) {
+  console.log("🔍 notifyUser triggered:");
+  console.log("notifyDaysInput:", item.notifyDaysInput);
+
   const notifyDays = item.notifyDaysInput
     ?.split(",")
     .map((d) => parseInt(d.trim()))
@@ -182,27 +185,34 @@ async function notifyUser(item) {
   const daysLeft = parseInt(item.daysLeft);
   const notified = Array.isArray(item.notifiedDays) ? item.notifiedDays.map(Number) : [];
 
-  for (const day of notifyDays) {
-    if (daysLeft === day && !notified.includes(day)) {
+  for (const days of notifyDays) {
+    if (daysLeft === days && !notified.includes(days)) {
       try {
         await axios.post("http://localhost:5000/api/notify", {
           domain: item.domain,
           email: item.email,
-          daysLeft: day,
+          daysLeft: days,
         });
 
         Swal.fire({
           icon: "success",
           title: "Notification Sent",
-          html: `<strong>${item.domain}</strong> - <b>${day} days</b> left.<br>Email sent to <code>${item.email}</code>`
+          html: `<strong>${item.domain}</strong> - <b>${days} days</b> left.<br>Email sent to <code>${item.email}</code>`
         });
 
-        item.notifiedDays.push(day);
-        await updateTrackedEmail(item);
+        item.notifiedDays.push(days);
+
+        // Update DB after modifying notifiedDays
+        await updateTrackedEmail({
+          domain: item.domain,
+          email: item.email,
+          notifiedDays: item.notifiedDays
+        });
+
         sent = true;
       } catch (err) {
         console.error("Notification error:", err.message);
-        Swal.fire("Failed", `Error sending for ${day} days`, "error");
+        Swal.fire("Failed", `Error sending for ${days} days`, "error");
       }
     }
   }
@@ -211,6 +221,7 @@ async function notifyUser(item) {
     Swal.fire("No email sent", "No eligible notify days or already notified", "info");
   }
 }
+
 
 async function untrackDomain(domain) {
   const confirm = await Swal.fire({
@@ -237,15 +248,26 @@ async function untrackDomain(domain) {
 
 async function updateTrackedEmail({ domain, email, notifiedDays }) {
   try {
-    await axios.patch("http://localhost:5000/api/track/email", {
-      domain,
-      email,
-      notifiedDays,
-    });
+    const token = localStorage.getItem("token"); // Make sure token is stored after login
+
+    await axios.patch(
+      "http://localhost:5000/api/track/email",
+      {
+        domain,
+        email,
+        notifiedDays,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include token here
+        },
+      }
+    );
   } catch (err) {
     console.error("Update email failed:", err.message);
   }
 }
+
 
 
 function computeDaysLeft(expiryDate) {
@@ -276,6 +298,8 @@ function updateNotifyDays({ domain, notifyDays }) {
       .filter((n) => !isNaN(n));
   }
 }
+
+
 
 async function loadUserHistory() {
   try {
@@ -347,7 +371,7 @@ function searchFromHistory(domain) {
 
     <!-- Logout button -->
     <div class="logout-wrapper">
-      <button @click="logout" class="logout-button">Logout</button>
+      <button @click="logout" class="logout-btn">Logout</button>
     </div>
 
     <Form @search="handleSearch" />
@@ -388,6 +412,22 @@ function searchFromHistory(domain) {
 </template>
 
 <style scoped>
+
+.logout-btn {
+  background-color: #f87171;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.logout-btn:hover {
+  background-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.192);
+}
+
+
 .app-wrapper {
   position: relative;
   padding: 20px;
@@ -399,19 +439,6 @@ function searchFromHistory(domain) {
   right: 20px;
 }
 
-.logout-button {
-  background-color: #f87171;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.logout-button:hover {
-  background-color: #ef4444;
-}
 
 .main-container {
   display: flex;
@@ -441,6 +468,8 @@ function searchFromHistory(domain) {
 .track-expiry-button:hover {
   background-color: #3b3ac9;
   color: #e3e7eb;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.192);
 }
 
 /* Responsive tweaks */

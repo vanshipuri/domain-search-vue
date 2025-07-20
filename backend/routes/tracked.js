@@ -50,16 +50,16 @@ router.delete("/:domain", auth, (req, res) => {
 });
 
 // PATCH email or notifiedDays for current user
-router.patch("/email", auth, (req, res) => {
-  const username = req.user.username;
+router.patch("/email", auth, async (req, res) => {
   const { domain, email, notifiedDays = [] } = req.body;
+  const username = req.user.username;
 
   if (!domain) {
     return res.status(400).json({ error: "Domain is required" });
   }
 
   try {
-    repo.updateTrackedEmailOrNotify(username, domain, email, notifiedDays);
+    await repo.updateTrackedEmail(username, domain, email, notifiedDays); // ✅ Added await
     res.json({ success: true });
   } catch (err) {
     console.error("Failed to update domain:", err.message);

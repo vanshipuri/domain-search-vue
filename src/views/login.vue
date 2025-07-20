@@ -2,7 +2,6 @@
   <section class="login-section">
     <div class="login-container">
       <a href="#" class="login-logo">
-        <span>Login Form</span>
       </a>
       <div class="login-box">
         <div class="login-box-inner">
