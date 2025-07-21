@@ -15,6 +15,16 @@ function computeDaysLeft(expiryDate) {
 }
 
 async function notifyUser(item) {
+  const today = new Date().toISOString().split("T")[0];
+  const lastNotified = item.lastNotified ? item.lastNotified.split("T")[0] : null;
+
+console.log(`🔎 ${item.domain} → lastNotified: ${lastNotified}, today: ${today}`);
+
+  if (lastNotified === today) {
+    console.log(`Already notified today for domain: ${item.domain}`);
+    return; 
+  }
+
   const notifyDays = (item.notifyDaysInput || "")
     .split(",")
     .map((d) => parseInt(d.trim()))
@@ -39,12 +49,13 @@ async function notifyUser(item) {
           email: item.email,
         });
 
-        // Update notifiedDays in DB
+        // Update notify Days in DB
         const updateNotified = Array.from(
           new Set([...(item.notifiedDays || []), day])
         );
         await repository.updateNotifiedDays(item.domain, updateNotified);
-
+        await repository.updateLastNotified(item.domain, today);
+        
         console.log(`Notified ${item.email} for domain ${item.domain}`);
       } catch (error) {
         console.error(" Failed to send email:", error.message);

@@ -1,18 +1,6 @@
 const Database = require("better-sqlite3");
 const db = new Database("domains.db");
 
-db.prepare(
-  `
-  CREATE TABLE IF NOT EXISTS tracked_domains (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    domain TEXT,
-    email TEXT,
-    expiryDate TEXT,
-    notified INTEGER DEFAULT 0,
-    notifiedDays TEXT DEFAULT '[]'
-  )
-`
-).run();
 
 class TrackedRepository {
   constructor() {
@@ -46,165 +34,76 @@ class TrackedRepository {
       `
       CREATE TABLE IF NOT EXISTS expiry_tracker (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
+        userId TEXT NOT NULL,
         domain TEXT NOT NULL,
         email TEXT,
         expiryDate TEXT,
         notified INTEGER DEFAULT 0,
-        notifiedDays TEXT DEFAULT '[]',
-        UNIQUE(username, domain)
+        lastNotified TEXT DEFAULT NULL,
+        UNIQUE(userId, domain),
+        FOREIGN KEY (userId) REFERENCES users(id)
       )
     `
     ).run();
   }
-  getAll() {
-    return db.prepare("SELECT * FROM tracked_domains").all();
+  
+  getAllByUser(userId) {
+    const rows = this.db.prepare("SELECT * FROM expiry_tracker WHERE userId = ?").all(userId);
+   console.log("Parsed tracked data for user:", userId, rows);
+   return rows;
   }
 
-  save(domain, email, expiryDate, notified = 0, notifiedDays = []) {
-    return db
-      .prepare(
-        `
-      INSERT OR REPLACE INTO tracked_domains 
-      (domain, email, expiryDate, notified, notifiedDays)
-      VALUES (?, ?, ?, ?, ?)
-    `
-      )
-      .run(domain, email, expiryDate, notified, JSON.stringify(notifiedDays));
-  }
-
-  getAllByUser(username) {
-    return this.db
-      .prepare(
-        `
-    SELECT * FROM expiry_tracker WHERE username = ?
-  `
-      )
-      .all(username);
-  }
-
-  deleteDomainForUser(username, domain) {
-    return this.db
-      .prepare(
-        `
-    DELETE FROM expiry_tracker WHERE username = ? AND domain = ?
-  `
-      )
-      .run(username, domain);
-  }
-
-  getByDomain(domain) {
-    return db
-      .prepare("SELECT * FROM tracked_domains WHERE domain = ?")
-      .get(domain);
-  }
-
-  delete(domain) {
-    return db
-      .prepare("DELETE FROM tracked_domains WHERE domain = ?")
-      .run(domain);
-  }
-
-  updateEmail(domain, email) {
-    return db
-      .prepare("UPDATE tracked_domains SET email = ? WHERE domain = ?")
-      .run(email, domain);
-  }
-
-  updateNotifiedDays(domain, notifiedDays) {
-    return db
-      .prepare("UPDATE tracked_domains SET notifiedDays = ? WHERE domain = ?")
-      .run(JSON.stringify(notifiedDays), domain);
-  }
-
-  saveDomainForUser(
-    username,
-    domain,
-    email,
-    expiryDate,
-    notified = 0,
-    notifiedDays = []
-  ) {
-    return db
-      .prepare(
-        `
+  saveDomainForUser(userId, domain, email, expiryDate, notified = 0, lastNotified = null) {
+    return this.db.prepare(`
       INSERT OR REPLACE INTO expiry_tracker 
-      (username, domain, email, expiryDate, notified, notifiedDays)
+      (userId, domain, email, expiryDate, notified, lastNotified)
       VALUES (?, ?, ?, ?, ?, ?)
-    `
-      )
-      .run(
-        username,
-        domain,
-        email,
-        expiryDate,
-        notified,
-        JSON.stringify(notifiedDays)
-      );
+    `).run(userId, domain, email, expiryDate, notified, lastNotified);
   }
 
-  getAllByUser(username) {
-    const rows = db
-      .prepare("SELECT * FROM expiry_tracker WHERE username = ?")
-      .all(username);
-    const parsed = rows.map((row) => ({
-      ...row,
-      notifiedDays: parseNotifiedDays(row.notifiedDays),
-    }));
-    console.log(" Parsed tracked data for:", username, parsed);
-    return parsed;
+  updateLastNotified(domain, dateStr) {
+    return this.db.prepare(`
+      UPDATE expiry_tracker
+      SET lastNotified = ?
+      WHERE domain = ?
+    `).run(dateStr, domain);
   }
 
-  deleteTrackedDomain(username, domain) {
-    return db
-      .prepare("DELETE FROM expiry_tracker WHERE username = ? AND domain = ?")
-      .run(username, domain);
-  }
-
-  updateTrackedEmail(username, domain, email, notifiedDays) {
-    return db
-      .prepare(
-        `
+  updateTrackedEmail(userId, domain, email) {
+    return this.db.prepare(`
       UPDATE expiry_tracker 
-      SET email = ?, notifiedDays = ?
-      WHERE username = ? AND domain = ?
-    `
-      )
-      .run(email, JSON.stringify(notifiedDays), username, domain);
+      SET email = ?
+      WHERE userId = ? AND domain = ?
+    `).run(email, userId, domain);
   }
 
-  getUserByUsername(username) {
-    return db.prepare("SELECT * FROM users WHERE username = ?").get(username);
+  deleteDomainForUser(userId, domain) {
+    return this.db.prepare(`
+      DELETE FROM expiry_tracker WHERE userId = ? AND domain = ?
+    `).run(userId, domain);
   }
 
-  createUser(username, email, hashedPassword) {
-    return db
-      .prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")
-      .run(username, email, hashedPassword);
+  deleteTrackedDomain(userId, domain) {
+    return this.db.prepare(`
+      DELETE FROM expiry_tracker WHERE userId = ? AND domain = ?
+    `).run(userId, domain);
   }
 
-  saveHistory(username, query) {
-    return db
-      .prepare("INSERT INTO history (username, query) VALUES (?, ?)")
-      .run(username, query);
+ getUserByUsername(username) {
+    return this.db.prepare("SELECT * FROM users WHERE username = ?").get(username);
+  }
+
+createUser(username, email, hashedPassword) {
+    return this.db.prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)").run(username, email, hashedPassword);
+  }
+
+ saveHistory(username, query) {
+    return this.db.prepare("INSERT INTO history (username, query) VALUES (?, ?)").run(username, query);
   }
 
   getHistoryByUser(username) {
-    const rows = db
-      .prepare(
-        "SELECT query FROM history WHERE username = ? ORDER BY id DESC LIMIT 10"
-      )
-      .all(username);
+    const rows = this.db.prepare("SELECT query FROM history WHERE username = ? ORDER BY id DESC LIMIT 10").all(username);
     return rows.map((r) => r.query);
-  }
-}
-
-function parseNotifiedDays(value) {
-  try {
-    return value ? JSON.parse(value) : [];
-  } catch (err) {
-    console.warn("Failed to parse notifiedDays:", value);
-    return [];
   }
 }
 

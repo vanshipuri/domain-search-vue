@@ -233,7 +233,12 @@ async function untrackDomain(domain) {
 
   if (confirm.isConfirmed) {
     try {
-      await axios.delete(`http://localhost:5000/api/track/${domain}`);
+      await axios.delete(`http://localhost:5000/api/track/${domain}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
       tracked.value = tracked.value.filter((item) => item.domain !== domain);
       Swal.fire("Deleted!", `${domain} has been untracked.`, "success");
     } catch (error) {
@@ -242,6 +247,7 @@ async function untrackDomain(domain) {
     }
   }
 }
+
 
 async function updateTrackedEmail({ domain, email, notifiedDays }) {
   try {

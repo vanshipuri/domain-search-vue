@@ -7,8 +7,8 @@ const auth = require("../middlewares/auth");
 // GET all tracked domains for logged-in user
 router.get("/", auth, (req, res) => {
   try {
-    const username = req.user.username;
-    const data = repo.getAllByUser(username);
+    const userId = req.user.id;
+    const data = repo.getAllByUser(userId);
     res.json(data);
   } catch (err) {
     console.error("Failed to fetch domains:", err.message);
@@ -18,17 +18,17 @@ router.get("/", auth, (req, res) => {
 
 //  POST a new domain for the current user
 router.post("/", auth, (req, res) => {
-  const username = req.user.username;
-  const { domain, email, expiryDate, notified, notifiedDays } = req.body;
+  const userId = req.user.id;
+  const { domain, email, expiryDate, notified } = req.body;
 
-  console.log("Saving domain for user:", username, "Domain:", domain, 'body:', req.body);
+  console.log("Saving domain for user:", userId, "Domain:", domain, 'body:', req.body);
 
   if (!domain || !expiryDate) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-       repo.saveDomainForUser(username, domain, email || "N/A", expiryDate, notified ? 1 : 0, notifiedDays || []);
+       repo.saveDomainForUser(userId, domain, email || "N/A", expiryDate, notified ? 1 : 0, null);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to save domain" });
@@ -37,11 +37,11 @@ router.post("/", auth, (req, res) => {
 
 // DELETE a domain for current user
 router.delete("/:domain", auth, (req, res) => {
-  const username = req.user.username;
+  const userId = req.user.id;
   const domain = req.params.domain;
 
   try {
-    repo.deleteTrackedDomain(username, domain);
+    repo.deleteTrackedDomain(userId, domain);
     res.json({ success: true });
   } catch (err) {
     console.error("Failed to delete domain:", err.message);
@@ -51,15 +51,15 @@ router.delete("/:domain", auth, (req, res) => {
 
 // PATCH email or notifiedDays for current user
 router.patch("/email", auth, async (req, res) => {
-  const { domain, email, notifiedDays = [] } = req.body;
-  const username = req.user.username;
+  const { domain, email } = req.body;
+  const userId = req.user.id;
 
   if (!domain) {
     return res.status(400).json({ error: "Domain is required" });
   }
 
   try {
-    await repo.updateTrackedEmail(username, domain, email, notifiedDays); // ✅ Added await
+    await repo.updateTrackedEmail(userId, domain, email); //  Added await
     res.json({ success: true });
   } catch (err) {
     console.error("Failed to update domain:", err.message);
