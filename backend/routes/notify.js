@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 
 //POST route to send notification email
 router.post("/", async (req, res) => {
-  const { domain, daysLeft, email } = req.body;
+  const { domain, daysLeft, email} = req.body;
 
     if (!domain || !daysLeft || !email) {
     return res.status(400).json({ error: "Missing required fields" });

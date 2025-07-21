@@ -20,7 +20,6 @@ const searchResult = ref(null);
 const history = ref([]);
 const localStorageKey = "history";
 
-
 onMounted(async () => {
   const token = localStorage.getItem("token");
 
@@ -36,36 +35,29 @@ onMounted(async () => {
 
     user.value = response.data.user;
 
-   
     await loadUserHistory();
 
-  await loadTrackedDomainsFromBackend();
-
+    await loadTrackedDomainsFromBackend();
   } catch (err) {
-   console.error("Auth check failed:", err.response?.data || err.message);
+    console.error("Auth check failed:", err.response?.data || err.message);
     error.value = "Session expired. Redirecting to login...";
     localStorage.removeItem("token");
     setTimeout(() => router.push("/login"), 1500);
   }
 });
 
-
-
-
-
 function goToLogin() {
   router.push("/login");
 }
 
 function goToDashboard() {
-  router.push('/dashboard')
+  router.push("/dashboard");
 }
 
 function logout() {
-  localStorage.removeItem('token');
-  router.push('/login');
+  localStorage.removeItem("token");
+  router.push("/login");
 }
-
 
 function trackResult() {
   console.log("Clicked trackResult");
@@ -85,10 +77,10 @@ async function trackDomain(WhoisRecord) {
   if (!expiryDate) {
     console.warn("Domain does not exist, skipping tracking.");
     Swal.fire({
-      icon: 'warning',
-      title: 'Invalid Domain',
-      text: 'This domain does not exist and will not be tracked.',
-      confirmButtonColor: '#2563eb'
+      icon: "warning",
+      title: "Invalid Domain",
+      text: "This domain does not exist and will not be tracked.",
+      confirmButtonColor: "#2563eb",
     });
     return;
   }
@@ -105,7 +97,9 @@ async function trackDomain(WhoisRecord) {
     notifiedDays: [],
   };
 
-  const alreadyTracked = tracked.value.some((item) => item.domain === domainName);
+  const alreadyTracked = tracked.value.some(
+    (item) => item.domain === domainName
+  );
 
   if (!alreadyTracked) {
     tracked.value.push(domainObj);
@@ -126,20 +120,23 @@ async function trackDomain(WhoisRecord) {
 
 async function saveTrackedDomainToBackend(domainObj) {
   try {
-    await axios.post("http://localhost:5000/api/track", {
-      ...domainObj,
-      notifiedDays: domainObj.notifiedDays || [],
-    }, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
+    await axios.post(
+      "http://localhost:5000/api/track",
+      {
+        ...domainObj,
+        notifiedDays: domainObj.notifiedDays || [],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       }
-    });
+    );
   } catch (error) {
     console.error("Error saving domain:", error);
     Swal.fire("Error", "Could not save domain to server.", "error");
   }
 }
-
 
 async function loadTrackedDomainsFromBackend() {
   try {
@@ -157,8 +154,10 @@ async function loadTrackedDomainsFromBackend() {
       return {
         ...item,
         daysLeft: typeof daysLeft === "string" ? daysLeft : parseInt(daysLeft),
-        notifiedDays: Array.isArray(item.notifiedDays) ? item.notifiedDays.map(Number) : [],
-        notifyDaysInput: "", 
+        notifiedDays: Array.isArray(item.notifiedDays)
+          ? item.notifiedDays.map(Number)
+          : [],
+        notifyDaysInput: "",
         status,
       };
     });
@@ -168,13 +167,14 @@ async function loadTrackedDomainsFromBackend() {
 }
 
 async function notifyUser(item) {
-  console.log("🔍 notifyUser triggered:");
-  console.log("notifyDaysInput:", item.notifyDaysInput);
+  console.log(" notifyUser triggered:");
 
   const notifyDays = item.notifyDaysInput
     ?.split(",")
     .map((d) => parseInt(d.trim()))
     .filter((d) => !isNaN(d));
+
+  console.log("notifyDaysInput:", item.notifyDaysInput, notifyDays);
 
   if (!notifyDays?.length) {
     Swal.fire("No notify days set", "Please enter notify days", "info");
@@ -182,11 +182,14 @@ async function notifyUser(item) {
   }
 
   let sent = false;
-  const daysLeft = parseInt(item.daysLeft);
-  const notified = Array.isArray(item.notifiedDays) ? item.notifiedDays.map(Number) : [];
+  const daysLeft = Math.ceil(parseInt(item.daysLeft));
 
   for (const days of notifyDays) {
-    if (daysLeft === days && !notified.includes(days)) {
+    console.log(
+      `Checking if notification should be sent for ${days} days left`,
+      daysLeft
+    );
+    if (daysLeft == days) {
       try {
         await axios.post("http://localhost:5000/api/notify", {
           domain: item.domain,
@@ -197,16 +200,7 @@ async function notifyUser(item) {
         Swal.fire({
           icon: "success",
           title: "Notification Sent",
-          html: `<strong>${item.domain}</strong> - <b>${days} days</b> left.<br>Email sent to <code>${item.email}</code>`
-        });
-
-        item.notifiedDays.push(days);
-
-        // Update DB after modifying notifiedDays
-        await updateTrackedEmail({
-          domain: item.domain,
-          email: item.email,
-          notifiedDays: item.notifiedDays
+          html: `<strong>${item.domain}</strong> - <b>${days} days</b> left.<br>Email sent to <code>${item.email}</code>`,
         });
 
         sent = true;
@@ -218,10 +212,13 @@ async function notifyUser(item) {
   }
 
   if (!sent) {
-    Swal.fire("No email sent", "No eligible notify days or already notified", "info");
+    Swal.fire(
+      "No email sent",
+      "No eligible notify days or already notified",
+      "info"
+    );
   }
 }
-
 
 async function untrackDomain(domain) {
   const confirm = await Swal.fire({
@@ -268,8 +265,6 @@ async function updateTrackedEmail({ domain, email, notifiedDays }) {
   }
 }
 
-
-
 function computeDaysLeft(expiryDate) {
   if (!expiryDate) return "N/A";
   const today = new Date();
@@ -279,7 +274,6 @@ function computeDaysLeft(expiryDate) {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return diffDays >= 0 ? diffDays : "Expired";
 }
-
 
 function updateNotifyDays({ domain, notifyDays }) {
   const item = tracked.value.find((d) => d.domain === domain);
@@ -296,10 +290,14 @@ function updateNotifyDays({ domain, notifyDays }) {
       .split(",")
       .map((d) => parseInt(d.trim()))
       .filter((n) => !isNaN(n));
+
+    updateTrackedEmail({
+      domain: item.domain,
+      email: item.email,
+      notifiedDays: item.notifiedDays,
+    });
   }
 }
-
-
 
 async function loadUserHistory() {
   try {
@@ -315,7 +313,6 @@ async function loadUserHistory() {
     console.error("Failed to load user history:", err.message);
   }
 }
-
 
 async function fetchWhoisData(domain) {
   isLoading.value = true;
@@ -340,7 +337,6 @@ async function fetchWhoisData(domain) {
   }
 }
 
-
 function appendSearchToHistory(domain) {
   if (!history.value.includes(domain)) {
     history.value.unshift(domain);
@@ -350,7 +346,6 @@ function appendSearchToHistory(domain) {
   }
 }
 
-
 async function handleSearch(domain) {
   if (domain) {
     await fetchWhoisData(domain);
@@ -358,11 +353,9 @@ async function handleSearch(domain) {
   }
 }
 
-
 function searchFromHistory(domain) {
   fetchWhoisData(domain);
 }
-
 </script>
 
 <template>
@@ -403,16 +396,15 @@ function searchFromHistory(domain) {
   </div>
 
   <div v-else-if="error">
-    <p style="text-align: center; padding-top: 40px;">{{ error }}</p>
+    <p style="text-align: center; padding-top: 40px">{{ error }}</p>
   </div>
 
   <div v-else>
-    <p style="text-align: center; padding-top: 40px;">Loading...</p>
+    <p style="text-align: center; padding-top: 40px">Loading...</p>
   </div>
 </template>
 
 <style scoped>
-
 .logout-btn {
   background-color: #f87171;
   color: white;
@@ -427,7 +419,6 @@ function searchFromHistory(domain) {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.192);
 }
 
-
 .app-wrapper {
   position: relative;
   padding: 20px;
@@ -438,7 +429,6 @@ function searchFromHistory(domain) {
   top: 20px;
   right: 20px;
 }
-
 
 .main-container {
   display: flex;

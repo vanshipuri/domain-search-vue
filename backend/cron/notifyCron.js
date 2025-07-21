@@ -16,16 +16,17 @@ function computeDaysLeft(expiryDate) {
 
 async function notifyUser(item) {
   const notifyDays = (item.notifyDaysInput || "")
-  .split(",")
-  .map(d => parseInt(d.trim()))
-  .filter(d => !isNaN(d));
-
+    .split(",")
+    .map((d) => parseInt(d.trim()))
+    .filter((d) => !isNaN(d));
 
   for (const day of notifyDays) {
     if (
       item.daysLeft === day &&
-      Array.isArray(item.notifiedDays) && !item.notifiedDays.includes(day) &&
-      item.email && item.email !== "N/A"
+      Array.isArray(item.notifiedDays) &&
+      !item.notifiedDays.includes(day) &&
+      item.email &&
+      item.email !== "N/A"
     ) {
       console.log(
         `Sending email: Domain "${item.domain}" expires in ${day} days. Notify ${item.email}`
@@ -39,7 +40,9 @@ async function notifyUser(item) {
         });
 
         // Update notifiedDays in DB
-       const updateNotified = Array.from(new Set([...(item.notifiedDays || []), day]));
+        const updateNotified = Array.from(
+          new Set([...(item.notifiedDays || []), day])
+        );
         await repository.updateNotifiedDays(item.domain, updateNotified);
 
         console.log(`Notified ${item.email} for domain ${item.domain}`);
@@ -51,26 +54,26 @@ async function notifyUser(item) {
 }
 
 function runDailyNotifier() {
-    // Run daily at 9 AM
-    cron.schedule("0 9 * * *", async () => {
+  // Run daily at 9 AM
+  cron.schedule("0 9 * * *", async () => {
     console.log("Running daily notifier (9AM)");
 
-    try{
-          const domains = await repository.getAll();
-    
-  for (let item of domains) {
-    const daysLeft = computeDaysLeft(item.expiryDate);
-    if (daysLeft !== null) {
-        item.daysLeft = daysLeft;
-    await notifyUser(item);
-  }
-}
+    try {
+      const domains = await repository.getAll();
 
-console.log("Daily notifier completed successfully.");
-    } catch(error){
-        console.error("Error in daily notifier:", error.message);
+      for (let item of domains) {
+        const daysLeft = computeDaysLeft(item.expiryDate);
+        if (daysLeft !== null) {
+          item.daysLeft = daysLeft;
+          await notifyUser(item);
+        }
+      }
+
+      console.log("Daily notifier completed successfully.");
+    } catch (error) {
+      console.error("Error in daily notifier:", error.message);
     }
-});
+  });
 }
 
 module.exports = runDailyNotifier;
