@@ -13,8 +13,11 @@ const emit = defineEmits(['track']);
     
 
     <div class="results-box">
-      <h3 class="title"><b>Search Results</b></h3>
-      <div v-if="isLoading" class="loader-container">
+     <h3 class="title">
+  <i class="fa-brands fa-searchengin icon"></i>
+  Search Results
+</h3>
+<div v-if="isLoading" class="loader-container">
         <div class="loadingio-eclipse">
           <div class="ldio-rpinwye8j0b"><div></div></div>
         </div>
@@ -63,30 +66,56 @@ const emit = defineEmits(['track']);
 .results-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px 20px;
   box-sizing: border-box;
 }
 
 .title {
   text-align: center;
-  color: #3730a3;
-  font-size: 22px;
-  margin-bottom: 20px;
+  color:  #4338ca;
+   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #4338ca; 
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-shadow: 0 1px 2px rgba(67, 56, 202, 0.1);
+
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-shadow: 0 1px 2px rgba(67, 56, 202, 0.1);
+}
+
+.icon {
+  font-size: 1.6rem;
+  color: #4338ca; /* Indigo-500 */
+  padding: 8px;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.title:hover .icon {
+  transform: rotate(10deg) scale(1.05);
 }
 
 .results-box {
   background-color: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #1f2937;
   word-wrap: break-word;
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s;
 }
 
-.results-box:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+.results-box:hover { 
+   box-shadow: 0 10px 25px rgba(67, 56, 202, 0.15);
+  transform: translateY(-3px);
 }
 
 .error-msg {

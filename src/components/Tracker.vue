@@ -15,14 +15,6 @@ const emit = defineEmits([
   "updateNotifyDays",
 ]);
 
-watchEffect(() => {
-  props.tracked.forEach((item) => {
-    if (!item.notifyDaysInput) {
-      item.notifyDaysInput = (item.notifiedDays || []).join(",");
-    }
-  });
-});
-
 function confirmUntrack(domain) {
   emit("untrackDomain", domain);
 }
@@ -72,11 +64,11 @@ function formatDate(dateString) {
             <td class="notify-cell">
               <input
                 type="text"
-                v-model="item.notifyDaysInput"
+                v-model="item.notifyDays"
                 @change="
                   emit('updateNotifyDays', {
                     domain: item.domain,
-                    notifyDays: item.notifyDaysInput,
+                    notifyDays: item.notifyDays,
                   })
                 "
                 placeholder="e.g. 30,14,7"
@@ -141,9 +133,10 @@ function formatDate(dateString) {
   width: 100%;
   margin-top: 2rem;
   border-collapse: collapse;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
-.tracker-table th, .tracker-table td {
+.tracker-table th,
+.tracker-table td {
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
   text-align: center;
@@ -175,7 +168,6 @@ function formatDate(dateString) {
   color: #1f2937;
 }
 
-
 /*.tracker-table {
   width: 100%;
   border-collapse: collapse;
@@ -188,7 +180,7 @@ function formatDate(dateString) {
 
 thead {
   background-color: #f3f4f6; /* Grey header */
-  /*font-weight: 600;
+/*font-weight: 600;
   color: #374151;
   font-size: 0.8rem;
   text-transform: uppercase;

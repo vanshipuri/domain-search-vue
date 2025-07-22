@@ -3,25 +3,31 @@ const props = defineProps({
   history: Array,
 });
 const emit = defineEmits(['searchFromHistory']);
+
 </script>
 
 <template>
   <div class="history-container">
-    <h3 class="history-heading"><b>Previous Searches</b></h3>
+    <h3 class="history-heading">
+      <i class="fas fa-clock" style="margin-right: 6px;"></i>
+      Previous Searches
+    </h3>
 
     <div class="history-list">
       <span
         v-for="(item, index) in history"
         :key="index"
-        @click.prevent="emit('searchFromHistory', item)"
+        @click="emit('searchFromHistory', item)"
         class="history-item"
       >
         {{ item }}
-        <hr />
       </span>
+
+      <p v-if="!history.length" class="empty-history">No previous searches</p>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .history-container {
@@ -42,10 +48,26 @@ const emit = defineEmits(['searchFromHistory']);
 
 .history-heading {
   text-align: center;
-  color: #4338ca; /* Indigo-700 */
+  color: #4338ca; 
   font-size: 1.4rem;
   font-weight: 600;
   margin-bottom: 20px;
+}
+
+.history-item.active {
+  background-color: #c7d2fe; 
+  color: #1e1b4b;
+  font-weight: 600;
+}
+.history-list::-webkit-scrollbar {
+  width: 6px;
+}
+.history-list::-webkit-scrollbar-thumb {
+  background-color: #c7d2fe;
+  border-radius: 10px;
+}
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .history-list {
@@ -55,6 +77,12 @@ const emit = defineEmits(['searchFromHistory']);
   max-height: 300px;
   overflow-y: auto;
   scrollbar-width: thin;
+}
+.empty-history {
+  color: #9ca3af;
+  text-align: center;
+  padding: 12px 0;
+  font-style: italic;
 }
 
 .history-item {

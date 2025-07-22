@@ -11,43 +11,34 @@
 .header {
   background: linear-gradient(to right, #4f46e5, #6366f1);
   color: white;
-  padding: 1rem 2rem;
+  padding: 0.5rem 1.25rem;      /* Reduced padding */
   border-radius: 0 0 10px 10px;
   font-family: 'Segoe UI', sans-serif;
-  font-size: 2rem;
-  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 1.5rem;         /* Smaller font */
+  font-weight: 600;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .header-title {
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #ffffff;
-  letter-spacing: 0.8px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+/* Responsive boost for tablets/laptops */
 @media (min-width: 640px) {
   .header-title {
-    font-size: 2.25rem;
+    font-size: 1.5rem;
   }
 }
 @media (min-width: 768px) {
   .header-title {
-    font-size: 2.75rem;
-  }
-}
-
-@keyframes fade-in-down {
-  0% {
-    opacity: 0;
-    transform: translateY(-24px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+    font-size: 1.75rem;
   }
 }
 </style>

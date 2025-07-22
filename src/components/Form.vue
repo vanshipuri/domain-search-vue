@@ -54,19 +54,23 @@ async function onSubmit() {
 }
 
 .search-input {
-  padding: 0.75rem 1rem;
-  width: 350px;
+  padding: 0.6rem 1rem;
+  width: 280px;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .submit {
   background-color: #4f46e5;
   color: white;
-  padding: 0.75rem 1.5rem;
+  height:42px;
   border: none;
-  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  border: none;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.3s;
@@ -119,6 +123,25 @@ input[type="text"]:focus {
   color: #6b7280;
   font-style: italic;
 }
+
+@media (max-width: 639px) {
+  .form-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .search-input,
+  .submit {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+  }
+}
+
+input[type="text"] {
+  transition: all 0.3s ease-in-out;
+}
+
 
 /*.submit {
   display: flex;

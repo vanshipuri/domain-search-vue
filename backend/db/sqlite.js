@@ -1,7 +1,6 @@
 const Database = require("better-sqlite3");
 const db = new Database("domains.db");
 
-
 class TrackedRepository {
   constructor() {
     this.db = db;
@@ -38,6 +37,7 @@ class TrackedRepository {
         domain TEXT NOT NULL,
         email TEXT,
         expiryDate TEXT,
+        notifyDays TEXT,
         notified INTEGER DEFAULT 0,
         lastNotified TEXT DEFAULT NULL,
         UNIQUE(userId, domain),
@@ -46,63 +46,114 @@ class TrackedRepository {
     `
     ).run();
   }
-  
+
   getAllByUser(userId) {
-    const rows = this.db.prepare("SELECT * FROM expiry_tracker WHERE userId = ?").all(userId);
-   console.log("Parsed tracked data for user:", userId, rows);
-   return rows;
+    const rows = this.db
+      .prepare("SELECT * FROM expiry_tracker WHERE userId = ?")
+      .all(userId);
+    console.log("Parsed tracked data for user:", userId, rows);
+    return rows;
   }
 
-  saveDomainForUser(userId, domain, email, expiryDate, notified = 0, lastNotified = null) {
-    return this.db.prepare(`
+  saveDomainForUser(
+    userId,
+    domain,
+    email,
+    expiryDate,
+    notified = 0,
+    lastNotified = null
+  ) {
+    return this.db
+      .prepare(
+        `
       INSERT OR REPLACE INTO expiry_tracker 
       (userId, domain, email, expiryDate, notified, lastNotified)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(userId, domain, email, expiryDate, notified, lastNotified);
+    `
+      )
+      .run(userId, domain, email, expiryDate, notified, lastNotified);
   }
 
-  updateLastNotified(domain, dateStr) {
-    return this.db.prepare(`
+  updateLastNotified(userId, domain, dateStr) {
+    return this.db
+      .prepare(
+        `
       UPDATE expiry_tracker
       SET lastNotified = ?
-      WHERE domain = ?
-    `).run(dateStr, domain);
+      WHERE domain = ? and userId = ?
+    `
+      )
+      .run(dateStr, domain, userId);
   }
 
   updateTrackedEmail(userId, domain, email) {
-    return this.db.prepare(`
+    return this.db
+      .prepare(
+        `
       UPDATE expiry_tracker 
       SET email = ?
       WHERE userId = ? AND domain = ?
-    `).run(email, userId, domain);
+    `
+      )
+      .run(email, userId, domain);
+  }
+
+  updateTrackedNotifyDays(userId, domain, notifyDays) {
+    return this.db
+      .prepare(
+        `
+      UPDATE expiry_tracker 
+      SET notifyDays = ?
+      WHERE userId = ? AND domain = ?
+    `
+      )
+      .run(notifyDays, userId, domain);
   }
 
   deleteDomainForUser(userId, domain) {
-    return this.db.prepare(`
+    return this.db
+      .prepare(
+        `
       DELETE FROM expiry_tracker WHERE userId = ? AND domain = ?
-    `).run(userId, domain);
+    `
+      )
+      .run(userId, domain);
   }
 
   deleteTrackedDomain(userId, domain) {
-    return this.db.prepare(`
+    return this.db
+      .prepare(
+        `
       DELETE FROM expiry_tracker WHERE userId = ? AND domain = ?
-    `).run(userId, domain);
+    `
+      )
+      .run(userId, domain);
   }
 
- getUserByUsername(username) {
-    return this.db.prepare("SELECT * FROM users WHERE username = ?").get(username);
+  getUserByUsername(username) {
+    return this.db
+      .prepare("SELECT * FROM users WHERE username = ?")
+      .get(username);
   }
 
-createUser(username, email, hashedPassword) {
-    return this.db.prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)").run(username, email, hashedPassword);
+  createUser(username, email, hashedPassword) {
+    return this.db
+      .prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)")
+      .run(username, email, hashedPassword);
   }
 
- saveHistory(username, query) {
-    return this.db.prepare("INSERT INTO history (username, query) VALUES (?, ?)").run(username, query);
+  saveHistory(username, query) {
+    return this.db
+      .prepare("INSERT INTO history (username, query) VALUES (?, ?)")
+      .run(username, query);
   }
 
   getHistoryByUser(username) {
-    const rows = this.db.prepare("SELECT query FROM history WHERE username = ? ORDER BY id DESC LIMIT 10").all(username);
+    const rows = this.db
+      .prepare(
+        "SELECT query FROM history WHERE username = ? ORDER BY id DESC LIMIT 10"
+      )
+      .all(username);
     return rows.map((r) => r.query);
   }
 }

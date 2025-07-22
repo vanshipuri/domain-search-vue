@@ -55,8 +55,25 @@ function goToDashboard() {
 }
 
 function logout() {
-  localStorage.removeItem("token");
-  router.push("/login");
+  Swal.fire({
+    title: "Are you sure?",
+    text: "Do you really want to logout?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, logout!",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem("token");
+      router.push("/login");
+      Swal.fire(
+        "Logged out!",
+        "You have been successfully logged out.",
+        "success"
+      );
+    }
+  });
 }
 
 function trackResult() {
@@ -94,7 +111,7 @@ async function trackDomain(WhoisRecord) {
     expiryDate,
     daysLeft,
     status,
-    notifiedDays: [],
+    notifyDays: [],
   };
 
   const alreadyTracked = tracked.value.some(
@@ -124,7 +141,7 @@ async function saveTrackedDomainToBackend(domainObj) {
       "http://localhost:5000/api/track",
       {
         ...domainObj,
-        notifiedDays: domainObj.notifiedDays || [],
+        notifyDays: domainObj.notifyDays || [],
       },
       {
         headers: {
@@ -154,10 +171,9 @@ async function loadTrackedDomainsFromBackend() {
       return {
         ...item,
         daysLeft: typeof daysLeft === "string" ? daysLeft : parseInt(daysLeft),
-        notifiedDays: Array.isArray(item.notifiedDays)
-          ? item.notifiedDays.map(Number)
-          : [],
-        notifyDaysInput: "",
+        notifyDays: Array.isArray(item.notifyDays)
+          ? item.notifyDays.join(",")
+          : item.notifyDays,
         status,
       };
     });
@@ -169,12 +185,12 @@ async function loadTrackedDomainsFromBackend() {
 async function notifyUser(item) {
   console.log(" notifyUser triggered:");
 
-  const notifyDays = item.notifyDaysInput
+  const notifyDays = item.notifyDays
     ?.split(",")
     .map((d) => parseInt(d.trim()))
     .filter((d) => !isNaN(d));
 
-  console.log("notifyDaysInput:", item.notifyDaysInput, notifyDays);
+  console.log("notifyDays:", notifyDays);
 
   if (!notifyDays?.length) {
     Swal.fire("No notify days set", "Please enter notify days", "info");
@@ -248,8 +264,7 @@ async function untrackDomain(domain) {
   }
 }
 
-
-async function updateTrackedEmail({ domain, email, notifiedDays }) {
+async function updateTrackedEmail({ domain, email, notifyDays }) {
   try {
     const token = localStorage.getItem("token"); // Make sure token is stored after login
 
@@ -258,7 +273,7 @@ async function updateTrackedEmail({ domain, email, notifiedDays }) {
       {
         domain,
         email,
-        notifiedDays,
+        notifyDays,
       },
       {
         headers: {
@@ -292,15 +307,16 @@ function updateNotifyDays({ domain, notifyDays }) {
     item
   );
   if (item) {
-    item.notifiedDays = notifyDays
+    item.notifyDays = notifyDays
       .split(",")
       .map((d) => parseInt(d.trim()))
-      .filter((n) => !isNaN(n));
+      .filter((n) => !isNaN(n))
+      .join(",");
 
     updateTrackedEmail({
       domain: item.domain,
       email: item.email,
-      notifiedDays: item.notifiedDays,
+      notifyDays: item.notifyDays,
     });
   }
 }
@@ -370,7 +386,9 @@ function searchFromHistory(domain) {
 
     <!-- Logout button -->
     <div class="logout-wrapper">
-      <button @click="logout" class="logout-btn">Logout</button>
+      <button @click="logout" class="logout-btn">
+        <i class="fas fa-sign-out-alt" style="margin-right: 6px"></i>Logout
+      </button>
     </div>
 
     <Form @search="handleSearch" />
@@ -412,17 +430,20 @@ function searchFromHistory(domain) {
 
 <style scoped>
 .logout-btn {
-  background-color: #f87171;
+  background-color: #f87171; /* Red-400 */
   color: white;
+  padding: 0.4rem 0.8rem;
   border: none;
   border-radius: 8px;
-  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
+
 .logout-btn:hover {
-  background-color: #ef4444;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.192);
+  background-color: #ef4444; /* Red-500 */
 }
 
 .app-wrapper {
@@ -432,8 +453,8 @@ function searchFromHistory(domain) {
 
 .logout-wrapper {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 50px;
+  right: 30px;
 }
 
 .main-container {

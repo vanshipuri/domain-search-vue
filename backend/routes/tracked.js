@@ -21,14 +21,28 @@ router.post("/", auth, (req, res) => {
   const userId = req.user.id;
   const { domain, email, expiryDate, notified } = req.body;
 
-  console.log("Saving domain for user:", userId, "Domain:", domain, 'body:', req.body);
+  console.log(
+    "Saving domain for user:",
+    userId,
+    "Domain:",
+    domain,
+    "body:",
+    req.body
+  );
 
   if (!domain || !expiryDate) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-       repo.saveDomainForUser(userId, domain, email || "N/A", expiryDate, notified ? 1 : 0, null);
+    repo.saveDomainForUser(
+      userId,
+      domain,
+      email || "N/A",
+      expiryDate,
+      notified ? 1 : 0,
+      null
+    );
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to save domain" });
@@ -51,15 +65,32 @@ router.delete("/:domain", auth, (req, res) => {
 
 // PATCH email or notifiedDays for current user
 router.patch("/email", auth, async (req, res) => {
-  const { domain, email } = req.body;
+  const { domain, email, notifyDays } = req.body;
   const userId = req.user.id;
+
+  console.log("/email", domain, email, notifyDays, userId);
 
   if (!domain) {
     return res.status(400).json({ error: "Domain is required" });
   }
 
   try {
-    await repo.updateTrackedEmail(userId, domain, email); //  Added await
+    if (email !== undefined) {
+      await repo.updateTrackedEmail(userId, domain, email);
+      console.log("Updated email to ", email);
+    }
+    if (notifyDays !== undefined) {
+      const notifyDaysText = Array.isArray(notifyDays)
+        ? notifyDays.join(",")
+        : notifyDays;
+      await repo.updateTrackedNotifyDays(userId, domain, notifyDaysText);
+      console.log(
+        "Updated notifyDays to ",
+        notifyDays,
+        " as text ",
+        notifyDaysText
+      );
+    }
     res.json({ success: true });
   } catch (err) {
     console.error("Failed to update domain:", err.message);
@@ -68,4 +99,3 @@ router.patch("/email", auth, async (req, res) => {
 });
 
 module.exports = router;
-

@@ -16,28 +16,26 @@ function computeDaysLeft(expiryDate) {
 
 async function notifyUser(item) {
   const today = new Date().toISOString().split("T")[0];
-  const lastNotified = item.lastNotified ? item.lastNotified.split("T")[0] : null;
+  const lastNotified = item.lastNotified
+    ? item.lastNotified.split("T")[0]
+    : null;
 
-console.log(`🔎 ${item.domain} → lastNotified: ${lastNotified}, today: ${today}`);
+  console.log(
+    `🔎 ${item.domain} → lastNotified: ${lastNotified}, today: ${today}`
+  );
 
   if (lastNotified === today) {
     console.log(`Already notified today for domain: ${item.domain}`);
-    return; 
+    return;
   }
 
-  const notifyDays = (item.notifyDaysInput || "")
+  const notifyDays = (item.notifyDays || "")
     .split(",")
     .map((d) => parseInt(d.trim()))
     .filter((d) => !isNaN(d));
 
   for (const day of notifyDays) {
-    if (
-      item.daysLeft === day &&
-      Array.isArray(item.notifiedDays) &&
-      !item.notifiedDays.includes(day) &&
-      item.email &&
-      item.email !== "N/A"
-    ) {
+    if (item.daysLeft === day && item.email && item.email !== "N/A") {
       console.log(
         `Sending email: Domain "${item.domain}" expires in ${day} days. Notify ${item.email}`
       );
@@ -50,12 +48,8 @@ console.log(`🔎 ${item.domain} → lastNotified: ${lastNotified}, today: ${tod
         });
 
         // Update notify Days in DB
-        const updateNotified = Array.from(
-          new Set([...(item.notifiedDays || []), day])
-        );
-        await repository.updateNotifiedDays(item.domain, updateNotified);
-        await repository.updateLastNotified(item.domain, today);
-        
+        await repository.updateLastNotified(item.userId, item.domain, today);
+
         console.log(`Notified ${item.email} for domain ${item.domain}`);
       } catch (error) {
         console.error(" Failed to send email:", error.message);
