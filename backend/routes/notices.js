@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-router.get("/", function (req, res) {
+router.get("/privacy", function (req, res) {
   return res.send(`
 
     <!DOCTYPE html>
@@ -31,6 +31,38 @@ router.get("/", function (req, res) {
 </body>
 </html>
     `);
+});
+
+router.get("/delete-my-account", function (req, res) {
+  return res.send(`
+        <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account</title>
+</head>
+<body>
+
+    <h2>Delete Your Account</h2>
+
+    <p>We're sorry to see you go! If you'd like to delete your account, please send an email to the address below:</p>
+
+    <p><strong><a href="mailto:${process.env.CONTACT_EMAIL}">${process.env.CONTACT_EMAIL}</a></strong></p>
+
+    <p>In your email, please include the following information to help us process your request:</p>
+    <ul>
+        <li>Your username associated with your account.</li>
+        <li>A brief reason for your deletion request (optional, but helpful for us to improve).</li>
+    </ul>
+
+    <p>We will process your request as quickly as possible. Please note that it may take a few business days for your account to be fully deleted from our systems.</p>
+
+    <p>If you have any questions or need assistance, feel delighted to reach out to us at the same email address.</p>
+
+</body>
+</html>
+        `);
 });
 
 module.exports = router;
