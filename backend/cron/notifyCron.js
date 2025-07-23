@@ -2,6 +2,8 @@ const Repository = require("../db/sqlite");
 const axios = require("axios");
 const cron = require("node-cron");
 
+const mailer = require("../services/mailer");
+
 const repository = new Repository();
 
 function computeDaysLeft(expiryDate) {
@@ -41,16 +43,13 @@ async function notifyUser(item) {
       );
 
       try {
-        await axios.post("http://localhost:5000/api/notify", {
-          domain: item.domain,
-          daysLeft: day,
-          email: item.email,
-        });
+        await mailer.sendDomainExpiryMail(item.email, item.domain, day);
 
         // Update notify Days in DB
         await repository.updateLastNotified(item.userId, item.domain, today);
 
         console.log(`Notified ${item.email} for domain ${item.domain}`);
+        break;
       } catch (error) {
         console.error(" Failed to send email:", error.message);
       }
