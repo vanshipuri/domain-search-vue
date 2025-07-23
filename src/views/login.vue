@@ -31,6 +31,7 @@
             </div>
             <button type="submit" class="login-button">Continue</button>
             <p v-if="error" class="login-error">{{ error }}</p>
+            <footer>Use new Usernames to Register Automatically</footer>
           </form>
         </div>
       </div>
@@ -61,16 +62,17 @@ async function handleLogin() {
     const token = res.data.token;
     const isNewUser = res.data.isNewUser; 
     localStorage.setItem('token', token);
-     Swal.fire({
-      icon: 'success',
-      title: isNewUser ? 'Welcome!' : 'Welcome back!',
-      text: isNewUser
-        ? `Hi ${username.value}, your account has been created.`
-        : `Hi ${username.value}, glad to see you again!`,
-      confirmButtonColor: '#2563eb',
-    }).then(() => {
+    // Swal.fire({
+      //icon: 'success',
+      //title: isNewUser ? 'Welcome!' : 'Welcome back!',
+      //text: isNewUser
+        //? `Hi ${username.value}, your account has been created.`
+        //: `Hi ${username.value}, glad to see you again!`,
+      //confirmButtonColor: '#2563eb',
+    //})
+    //.then(() => {
       router.push('/app');
-    });
+    //});
   }catch (err) {
     const status = err?.response?.status;
 
@@ -87,7 +89,7 @@ async function handleLogin() {
 
       if (confirm.isConfirmed) {
         try {
-          const fakeEmail = `${username.value}@example.com`; // Can be anything
+          const fakeEmail = `${username.value}@example.com`;
           await axios.post('http://localhost:5000/api/register', {
             username: username.value,
             password: password.value,
@@ -125,6 +127,9 @@ async function handleLogin() {
 </script>
 
 <style scoped>
+footer{
+ color: #374151;
+}
 .login-section {
   background-color: #f9fafb;
   min-height: 100vh;

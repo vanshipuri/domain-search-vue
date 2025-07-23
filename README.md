@@ -59,10 +59,11 @@ Domain Tracker is a full-stack web application that helps users:
 - Play Store-ready with minimal changes
 
 ---
-
 ## Screen Recording
 
+### Domain Tracker App Demo
 
+![Domain Tracker App Screen Recording](src/assets/Domain-Tracker-App-SR.gif)
 
 ---
 
