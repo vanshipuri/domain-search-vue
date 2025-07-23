@@ -1,30 +1,33 @@
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
+import { ref } from "vue";
+import axios from "axios";
 
-const emit = defineEmits(['search']);
-const domainName = ref('');
+const emit = defineEmits(["search"]);
+const domainName = ref("");
 
 async function onSubmit() {
   const query = domainName.value.trim();
   if (!query) return;
 
-  emit('search', query);
+  emit("search", query);
 
   // Save search history to backend
   try {
     const token = localStorage.getItem("token");
-    await axios.post("http://localhost:5000/api/history", { query }, {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
-
+    await axios.post(
+      import.meta.env.VITE_API_URL + "/api/history",
+      { query },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
   } catch (err) {
     console.error("Error saving history:", err.response?.data || err.message);
   }
 
-  domainName.value = '';
+  domainName.value = "";
 }
 </script>
 
@@ -36,7 +39,8 @@ async function onSubmit() {
         v-model="domainName"
         id="domainName"
         placeholder="Enter domain name"
-        required autofocus
+        required
+        autofocus
       />
       <button class="submit" type="submit">
         <i class="fa-brands fa-searchengin"></i> Search
@@ -64,7 +68,7 @@ async function onSubmit() {
 .submit {
   background-color: #4f46e5;
   color: white;
-  height:42px;
+  height: 42px;
   border: none;
   padding: 0.6rem 1.25rem;
   border: none;
@@ -84,8 +88,8 @@ async function onSubmit() {
   align-items: center;
   justify-content: center;
   padding: 0 24px; /* removed top/bottom padding */
-  /*min-height: 40vh; /* enough space without margin */
- /* background-color: #ffffff;
+/*min-height: 40vh; /* enough space without margin */
+/* background-color: #ffffff;
 }*/
 .form {
   display: flex;
@@ -141,7 +145,6 @@ input[type="text"]:focus {
 input[type="text"] {
   transition: all 0.3s ease-in-out;
 }
-
 
 /*.submit {
   display: flex;

@@ -1,13 +1,13 @@
-#  Domain-Tracker Application
+# Domain-Tracker Application
 
-**Hosted Version:** 
- **LinkedIn:** [Vanshi](https://www.linkedin.com/in/vanshi-puri)
+**Hosted Version:**
+**LinkedIn:** [Vanshi](https://www.linkedin.com/in/vanshi-puri)
 
 Created by Vanshi in July 2025
 
 ---
 
-![App Screenshot](<src/assets/Screenshot_22-7-2025_125439_localhost.png>)
+![App Screenshot](src/assets/Screenshot_22-7-2025_125439_localhost.png)
 
 ---
 
@@ -17,7 +17,7 @@ A full-stack web app that allows users to **track domain expiry dates**, get **W
 
 ---
 
-##  What is this Application?
+## What is this Application?
 
 Domain Tracker is a full-stack web application that helps users:
 
@@ -34,31 +34,37 @@ Domain Tracker is a full-stack web application that helps users:
 ## Features...
 
 ### Authentication
+
 - User login & registration with JWT tokens
 - Token stored and validated securely
 
 ### Domain Tracking
+
 - Search any domain using WHOISXML API
 - Cache WHOIS data to reduce API usage
 - Store and display expiry date info
 
 ### Notifications
+
 - Email reminders sent **notifydays** before expiry
 - CRON job runs once daily and avoids duplicate sends using database tracking
 - Supports multiple email addresses separated by commas
 - Mailpit integration for development/testing
 
 ### Domain Management
+
 - Track and untrack domains
 - Customize which days to receive notifications
 - Per-user domain tracking (with `userId`)
 - Search history is user-specific
 
-###  Mobile App 
+### Mobile App
+
 - Deployed to Android using Capacitor
 - Play Store-ready with minimal changes
 
 ---
+
 ## Screen Recording
 
 ### Domain Tracker App Demo
@@ -67,7 +73,7 @@ Domain Tracker is a full-stack web application that helps users:
 
 ---
 
-##  Tech Stack
+## Tech Stack
 
 **Frontend:**  
 Vue.js 3, Vue Router, Tailwind CSS, Axios, SweetAlert2
@@ -80,9 +86,21 @@ WHOISXML API, Mailpit (for emails), Capacitor (for mobile build)
 
 ---
 
-##  How to Run the App Locally
+## How to Run the App Locally
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/vanshipuri/domain-search-vue.git
 cd domain-search-vue
+
+# frontend
+cp .env.example .env # setup environment variables
+npm run dev
+
+# backend
+cd backend
+cp .env.example .env # setup environment variables
+npm run dev
+
+```

@@ -1,8 +1,7 @@
 <template>
   <section class="login-section">
     <div class="login-container">
-      <a href="#" class="login-logo">
-      </a>
+      <a href="#" class="login-logo"> </a>
       <div class="login-box">
         <div class="login-box-inner">
           <h1 class="login-title">Sign in to your account</h1>
@@ -40,86 +39,86 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
-import Swal from 'sweetalert2';
+import { ref } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import Swal from "sweetalert2";
 
-const username = ref('');
-const password = ref('');
-const error = ref('');
+const username = ref("");
+const password = ref("");
+const error = ref("");
 const router = useRouter();
 
 async function handleLogin() {
   try {
     // Attempt to login
-    const res = await axios.post('http://localhost:5000/api/login', {
+    const res = await axios.post(import.meta.env.VITE_API_URL + "/api/login", {
       username: username.value,
-      password: password.value
+      password: password.value,
     });
 
     // Login successful
     const token = res.data.token;
-    const isNewUser = res.data.isNewUser; 
-    localStorage.setItem('token', token);
+    const isNewUser = res.data.isNewUser;
+    localStorage.setItem("token", token);
     // Swal.fire({
-      //icon: 'success',
-      //title: isNewUser ? 'Welcome!' : 'Welcome back!',
-      //text: isNewUser
-        //? `Hi ${username.value}, your account has been created.`
-        //: `Hi ${username.value}, glad to see you again!`,
-      //confirmButtonColor: '#2563eb',
+    //icon: 'success',
+    //title: isNewUser ? 'Welcome!' : 'Welcome back!',
+    //text: isNewUser
+    //? `Hi ${username.value}, your account has been created.`
+    //: `Hi ${username.value}, glad to see you again!`,
+    //confirmButtonColor: '#2563eb',
     //})
     //.then(() => {
-      router.push('/app');
+    router.push("/app");
     //});
-  }catch (err) {
+  } catch (err) {
     const status = err?.response?.status;
 
     if (status === 404) {
       // Username not found → ask to register
       const confirm = await Swal.fire({
-        title: 'User Not Found',
+        title: "User Not Found",
         text: `Do you want to register as "${username.value}"?`,
-        icon: 'question',
+        icon: "question",
         showCancelButton: true,
-        confirmButtonText: 'Yes, Register',
-        cancelButtonText: 'Cancel'
+        confirmButtonText: "Yes, Register",
+        cancelButtonText: "Cancel",
       });
 
       if (confirm.isConfirmed) {
         try {
           const fakeEmail = `${username.value}@example.com`;
-          await axios.post('http://localhost:5000/api/register', {
+          await axios.post(import.meta.env.VITE_API_URL + "/api/register", {
             username: username.value,
             password: password.value,
-            email: fakeEmail
+            email: fakeEmail,
           });
 
           // Auto-login after register
-          const loginRes = await axios.post('http://localhost:5000/api/login', {
-            username: username.value,
-            password: password.value
-          });
+          const loginRes = await axios.post(
+            import.meta.env.VITE_API_URL + "/api/login",
+            {
+              username: username.value,
+              password: password.value,
+            }
+          );
 
-          localStorage.setItem('token', loginRes.data.token);
+          localStorage.setItem("token", loginRes.data.token);
           router.push("/app");
-
         } catch (registerErr) {
           error.value = "Registration failed. Try a different username.";
         }
       }
-
     } else if (status === 409) {
       // Username exists but password is wrong
       Swal.fire({
-        icon: 'error',
-        title: 'Username Exists',
-        text: 'But the password is incorrect. Please choose a different username.',
+        icon: "error",
+        title: "Username Exists",
+        text: "But the password is incorrect. Please choose a different username.",
       });
-
     } else {
-      error.value = 'Unexpected error. Please try again.';
+      error.value = "Unexpected error. Please try again.";
       console.error("Login failed:", err);
     }
   }
@@ -127,8 +126,8 @@ async function handleLogin() {
 </script>
 
 <style scoped>
-footer{
- color: #374151;
+footer {
+  color: #374151;
 }
 .login-section {
   background-color: #f9fafb;

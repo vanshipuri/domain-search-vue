@@ -33,14 +33,14 @@ const emit = defineEmits(['track']);
           <strong>Name Servers:</strong><br />
           {{ searchResult.WhoisRecord.nameServers?.hostNames?.join(', ') || 'N/A' }}<br /><br />
           <strong>Registered On:</strong><br />
-          {{ searchResult.WhoisRecord.createdDate || 'N/A' }}<br /><br />
-          <strong>Expires On:</strong><br /> {{ searchResult.WhoisRecord.expiresDate || 'N/A' }}<br /><br />
-          <strong>Updated On:</strong><br /> {{ searchResult.WhoisRecord.updatedDate || 'N/A' }}<br /><br />
+          {{ searchResult.WhoisRecord.createdDate || searchResult.WhoisRecord.registryData.audit.createdDate || 'N/A' }}<br /><br />
+          <strong>Expires On:</strong><br /> {{ searchResult.WhoisRecord.expiresDate || searchResult.WhoisRecord.registryData?.expiresDate ||   'N/A' }}<br /><br />
+          <strong>Updated On:</strong><br /> {{ searchResult.WhoisRecord.updatedDate || searchResult.WhoisRecord.registryData.audit.updatedDate || 'N/A' }}<br /><br />
           <strong>Data Error:</strong><br /> {{ searchResult.WhoisRecord.dataError || 'N/A' }}
         </p>
       </div>
 
-      <div v-else-if="searchResult?.WhoisRecord?.dataError && searchResult?.WhoisRecord?.dataError !== 'MASKED_WHOIS_DATA'" class="info-block">
+      <div v-else-if="searchResult?.WhoisRecord?.dataError && searchResult?.WhoisRecord?.dataError !== 'MASKED_WHOIS_DATA' && searchResult?.WhoisRecord?.dataError !== 'INCOMPLETE_DATA' " class="info-block">
         <p v-if="searchResult.WhoisRecord.dataError === 'NO_DATA'">
           This domain does not exist.
         </p>

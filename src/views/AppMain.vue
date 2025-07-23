@@ -29,7 +29,7 @@ onMounted(async () => {
   }
 
   try {
-    const response = await axios.get("http://localhost:5000/api/me", {
+    const response = await axios.get(import.meta.env.VITE_API_URL + "/api/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -138,7 +138,7 @@ async function trackDomain(WhoisRecord) {
 async function saveTrackedDomainToBackend(domainObj) {
   try {
     await axios.post(
-      "http://localhost:5000/api/track",
+      import.meta.env.VITE_API_URL + "/api/track",
       {
         ...domainObj,
         notifyDays: domainObj.notifyDays || [],
@@ -159,11 +159,14 @@ async function loadTrackedDomainsFromBackend() {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get("http://localhost:5000/api/track", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      import.meta.env.VITE_API_URL + "/api/track",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     tracked.value = response.data.map((item) => {
       const daysLeft = computeDaysLeft(item.expiryDate);
@@ -207,7 +210,7 @@ async function notifyUser(item) {
     );
     if (daysLeft == days) {
       try {
-        await axios.post("http://localhost:5000/api/notify", {
+        await axios.post(import.meta.env.VITE_API_URL + "/api/notify", {
           domain: item.domain,
           email: item.email,
           daysLeft: days,
@@ -249,7 +252,7 @@ async function untrackDomain(domain) {
 
   if (confirm.isConfirmed) {
     try {
-      await axios.delete(`http://localhost:5000/api/track/${domain}`, {
+      await axios.delete(import.meta.env.VITE_API_URL + `/api/track/${domain}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -269,7 +272,7 @@ async function updateTrackedEmail({ domain, email, notifyDays }) {
     const token = localStorage.getItem("token"); // Make sure token is stored after login
 
     await axios.patch(
-      "http://localhost:5000/api/track/email",
+      import.meta.env.VITE_API_URL + "/api/track/email",
       {
         domain,
         email,
@@ -324,11 +327,14 @@ function updateNotifyDays({ domain, notifyDays }) {
 async function loadUserHistory() {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.get("http://localhost:5000/api/history", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(
+      import.meta.env.VITE_API_URL + "/api/history",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     history.value = response.data.history || [];
   } catch (err) {
@@ -340,7 +346,7 @@ async function fetchWhoisData(domain) {
   isLoading.value = true;
   searchError.value = null;
   try {
-    const apiUrl = `http://localhost:5000/api/whois?domain=${domain}`;
+    const apiUrl = import.meta.env.VITE_API_URL + `/api/whois?domain=${domain}`;
     const res = await fetch(apiUrl);
     const data = await res.json();
 
