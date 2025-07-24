@@ -88,11 +88,11 @@ function formatDate(dateString) {
               </button>
             </td>
 
-            <td>
+           <!-- <td>
               <button class="btn notify" @click="emit('manualNotify', item)">
                 Notify
               </button>
-            </td>
+            </td>-->
           </tr>
         </tbody>
       </table>

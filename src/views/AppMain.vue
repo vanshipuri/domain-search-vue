@@ -80,35 +80,55 @@ function trackResult() {
   console.log("Clicked trackResult");
   console.log("searchResult", searchResult.value);
 
-  if (!searchResult.value?.WhoisRecord) {
+  const record = searchResult.value?.WhoisRecord;
+
+  if (!record) {
     Swal.fire("Please search for a domain before tracking.");
     return;
   }
 
-  trackDomain(searchResult.value.WhoisRecord);
-}
+  const hasMinimumFields =
+    record.domainName &&
+    (record.createdDate || record.registryData?.audit?.createdDate) &&
+    (record.updatedDate || record.registryData?.audit?.updatedDate) &&
+    (record.expiresDate || record.registryData?.expiresDate);
 
-async function trackDomain(WhoisRecord) {
-  const expiryDate = WhoisRecord.expiresDate;
-
-  if (!expiryDate) {
-    console.warn("Domain does not exist, skipping tracking.");
+  if (!hasMinimumFields) {
     Swal.fire({
       icon: "warning",
-      title: "Invalid Domain",
-      text: "This domain does not exist and will not be tracked.",
-      confirmButtonColor: "#2563eb",
+      title: "Incomplete WHOIS Data",
+      text: "This domain has incomplete data and cannot be tracked.",
     });
     return;
   }
-  const domainName = WhoisRecord.domainName;
+
+  trackDomain(record);
+}
+
+async function trackDomain(WhoisRecord) {
+   const domainName = WhoisRecord.domainName;
+  const createdDate = WhoisRecord.createdDate || WhoisRecord.registryData?.audit?.createdDate;
+  const updatedDate = WhoisRecord.updatedDate || WhoisRecord.registryData?.audit?.updatedDate;
+  const expiryDate = WhoisRecord.expiresDate || WhoisRecord.registryData?.expiresDate;
+
   const daysLeft = computeDaysLeft(expiryDate);
   const status = daysLeft === "Expired" ? "Expired" : "Active";
 
-  const domainObj = {
+  if (status === "Expired") {
+    Swal.fire({
+      icon: "warning",
+      title: "Domain Expired",
+      text: "This domain has already expired and cannot be tracked.",
+    });
+    return;
+  }
+
+   const domainObj = {
     domain: domainName,
     email: WhoisRecord.administrativeContact?.email || "N/A",
     expiryDate,
+    createdDate,
+    updatedDate,
     daysLeft,
     status,
     notifyDays: [],
@@ -118,16 +138,16 @@ async function trackDomain(WhoisRecord) {
     (item) => item.domain === domainName
   );
 
-  if (!alreadyTracked) {
-    tracked.value.push(domainObj);
-  } else {
+if (alreadyTracked) {
     Swal.fire({
       icon: "info",
       title: "Already Tracked",
       text: "This domain is already being tracked.",
     });
+    return;
   }
-
+  
+  tracked.value.push(domainObj);
   try {
     await saveTrackedDomainToBackend(domainObj);
   } catch (error) {

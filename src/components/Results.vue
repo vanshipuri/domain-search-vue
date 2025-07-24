@@ -28,26 +28,43 @@ const emit = defineEmits(['track']);
       </div>
 
       <div v-else-if="searchResult?.WhoisRecord?.domainName" class="info-block">
-        <p>
-          <strong>Domain Name:</strong><br /> {{ searchResult.WhoisRecord.domainName }}<br /><br />
-          <strong>Name Servers:</strong><br />
-          {{ searchResult.WhoisRecord.nameServers?.hostNames?.join(', ') || 'N/A' }}<br /><br />
-          <strong>Registered On:</strong><br />
-          {{ searchResult.WhoisRecord.createdDate || searchResult.WhoisRecord.registryData.audit.createdDate || 'N/A' }}<br /><br />
-          <strong>Expires On:</strong><br /> {{ searchResult.WhoisRecord.expiresDate || searchResult.WhoisRecord.registryData?.expiresDate ||   'N/A' }}<br /><br />
-          <strong>Updated On:</strong><br /> {{ searchResult.WhoisRecord.updatedDate || searchResult.WhoisRecord.registryData.audit.updatedDate || 'N/A' }}<br /><br />
-          <strong>Data Error:</strong><br /> {{ searchResult.WhoisRecord.dataError || 'N/A' }}
-        </p>
-      </div>
+  <p>
+    <strong>Domain Name:</strong><br />
+    {{ searchResult.WhoisRecord.domainName }}<br /><br />
 
-      <div v-else-if="searchResult?.WhoisRecord?.dataError && searchResult?.WhoisRecord?.dataError !== 'MASKED_WHOIS_DATA' && searchResult?.WhoisRecord?.dataError !== 'INCOMPLETE_DATA' " class="info-block">
-        <p v-if="searchResult.WhoisRecord.dataError === 'NO_DATA'">
-          This domain does not exist.
-        </p>
-        <p v-else>
-          This domain is not registered.
-        </p>
-      </div>
+    <strong>Name Servers:</strong><br />
+    {{ searchResult.WhoisRecord.nameServers?.hostNames?.join(', ') || searchResult.WhoisRecord.registryData?.hostNames?.join(', ') || 'N/A' }}<br /><br />
+
+    <strong>Registered On:</strong><br />
+    {{ searchResult.WhoisRecord.createdDate || searchResult.WhoisRecord.registryData?.audit?.createdDate || 'N/A' }}<br /><br />
+
+    <strong>Expires On:</strong><br />
+    {{ searchResult.WhoisRecord.expiresDate || searchResult.WhoisRecord.registryData?.expiresDate || 'N/A' }}<br /><br />
+
+    <strong>Updated On:</strong><br />
+    {{ searchResult.WhoisRecord.updatedDate || searchResult.WhoisRecord.registryData?.audit?.updatedDate || 'N/A' }}<br /><br />
+
+    <strong>Data Error:</strong><br />
+    {{ searchResult.WhoisRecord.dataError || 'N/A' }}
+  </p>
+</div>
+
+<!-- Handle data errors -->
+<div v-else-if="searchResult?.WhoisRecord?.dataError" class="info-block">
+  <p v-if="searchResult.WhoisRecord.dataError === 'NO_DATA'">
+    This domain does not exist.
+  </p>
+  <p v-else-if="searchResult.WhoisRecord.dataError === 'INCOMPLETE_DATA'">
+    This domain is registered, but the WHOIS data is incomplete.
+  </p>
+  <p v-else-if="searchResult.WhoisRecord.dataError === 'MASKED_WHOIS_DATA'">
+    The WHOIS data for this domain is masked or private.
+  </p>
+  <p v-else>
+    Unknown WHOIS error: {{ searchResult.WhoisRecord.dataError }}
+  </p>
+</div>
+
 
       <div v-else class="info-block">
         <p>
@@ -64,6 +81,7 @@ const emit = defineEmits(['track']);
 
 <style scoped>
 .results-container {
+  width: 100%;
   max-width: 800px;
   margin: 0 auto;
   padding: 24px 20px;
@@ -173,16 +191,30 @@ const emit = defineEmits(['track']);
     font-size: 15px;
     padding: 16px;
   }
+
+  .title {
+    font-size: 1.5rem;
+    gap: 6px;
+  }
+
+  .icon {
+    font-size: 1.3rem;
+  }
 }
 
 @media (max-width: 480px) {
   .title {
-    font-size: 18px;
+    font-size: 1.2rem;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .results-box {
     font-size: 14px;
     padding: 12px;
+  }
+  .icon {
+    font-size: 1.2rem;
   }
 }
 </style>
