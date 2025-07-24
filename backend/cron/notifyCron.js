@@ -23,7 +23,7 @@ async function notifyUser(item) {
     : null;
 
   console.log(
-    `🔎 ${item.domain} → lastNotified: ${lastNotified}, today: ${today}`
+    ` ${item.domain} → lastNotified: ${lastNotified}, today: ${today}`
   );
 
   if (lastNotified === today) {
@@ -66,18 +66,57 @@ function runDailyNotifier() {
       const domains = await repository.getAll();
 
       for (let item of domains) {
-        const daysLeft = computeDaysLeft(item.expiryDate);
-        if (daysLeft !== null) {
-          item.daysLeft = daysLeft;
-          await notifyUser(item);
+        try {
+          // Fetch WHOIS data
+          const response = await axios.get(
+            "https://www.whoisxmlapi.com/whoisserver/WhoisService",
+            {
+              params: {
+                apiKey: process.env.WHOIS_API_KEY,
+                domainName: item.domain,
+                outputFormat: "JSON",
+              },
+            }
+          );
+
+          const record = response.data.WhoisRecord;
+          const newExpiry =
+            record.expiresDate || record.registryData?.expiresDate;
+
+          // Update expiry in DB if changed
+          if (newExpiry && newExpiry !== item.expiryDate) {
+            console.log(
+              ` Updating expiry for ${item.domain}: ${item.expiryDate} → ${newExpiry}`
+            );
+
+            item.expiryDate = newExpiry;
+            await repository.updateExpiryDate(
+              item.userId,
+              item.domain,
+              newExpiry
+            );
+          }
+
+          // Recalculate days left and notify
+          const daysLeft = computeDaysLeft(item.expiryDate);
+          if (daysLeft !== null) {
+            item.daysLeft = daysLeft;
+            await notifyUser(item);
+          }
+        } catch (err) {
+          console.error(
+            ` Failed to refresh WHOIS data for ${item.domain}:`,
+            err.message
+          );
         }
       }
 
-      console.log("Daily notifier completed successfully.");
+      console.log(" Daily notifier completed successfully.");
     } catch (error) {
-      console.error("Error in daily notifier:", error.message);
+      console.error(" Error in daily notifier:", error.message);
     }
   });
 }
+
 
 module.exports = runDailyNotifier;

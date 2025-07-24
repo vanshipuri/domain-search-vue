@@ -110,6 +110,16 @@ class TrackedRepository {
       .run(notifyDays, userId, domain);
   }
 
+  async updateExpiryDate(userId, domain, newExpiryDate) {
+  const query = `
+    UPDATE expiry_tracker
+    SET expiryDate = ?, updatedAt = CURRENT_TIMESTAMP
+    WHERE userId = ? AND domain = ?
+  `;
+  await this.db.run(query, [newExpiryDate, userId, domain]);
+}
+
+
   deleteDomainForUser(userId, domain) {
     return this.db
       .prepare(
