@@ -54,28 +54,6 @@ function goToDashboard() {
   router.push("/dashboard");
 }
 
-function logout() {
-  Swal.fire({
-    title: "Are you sure?",
-    text: "Do you really want to logout?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Yes, logout!",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      localStorage.removeItem("token");
-      router.push("/login");
-      Swal.fire(
-        "Logged out!",
-        "You have been successfully logged out.",
-        "success"
-      );
-    }
-  });
-}
-
 function trackResult() {
   console.log("Clicked trackResult");
   console.log("searchResult", searchResult.value);
@@ -106,10 +84,13 @@ function trackResult() {
 }
 
 async function trackDomain(WhoisRecord) {
-   const domainName = WhoisRecord.domainName;
-  const createdDate = WhoisRecord.createdDate || WhoisRecord.registryData?.audit?.createdDate;
-  const updatedDate = WhoisRecord.updatedDate || WhoisRecord.registryData?.audit?.updatedDate;
-  const expiryDate = WhoisRecord.expiresDate || WhoisRecord.registryData?.expiresDate;
+  const domainName = WhoisRecord.domainName;
+  const createdDate =
+    WhoisRecord.createdDate || WhoisRecord.registryData?.audit?.createdDate;
+  const updatedDate =
+    WhoisRecord.updatedDate || WhoisRecord.registryData?.audit?.updatedDate;
+  const expiryDate =
+    WhoisRecord.expiresDate || WhoisRecord.registryData?.expiresDate;
 
   const daysLeft = computeDaysLeft(expiryDate);
   const status = daysLeft === "Expired" ? "Expired" : "Active";
@@ -123,7 +104,7 @@ async function trackDomain(WhoisRecord) {
     return;
   }
 
-   const domainObj = {
+  const domainObj = {
     domain: domainName,
     email: WhoisRecord.administrativeContact?.email || "N/A",
     expiryDate,
@@ -138,7 +119,7 @@ async function trackDomain(WhoisRecord) {
     (item) => item.domain === domainName
   );
 
-if (alreadyTracked) {
+  if (alreadyTracked) {
     Swal.fire({
       icon: "info",
       title: "Already Tracked",
@@ -146,7 +127,7 @@ if (alreadyTracked) {
     });
     return;
   }
-  
+
   tracked.value.push(domainObj);
   try {
     await saveTrackedDomainToBackend(domainObj);
@@ -272,11 +253,14 @@ async function untrackDomain(domain) {
 
   if (confirm.isConfirmed) {
     try {
-      await axios.delete(import.meta.env.VITE_API_URL + `/api/track/${domain}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await axios.delete(
+        import.meta.env.VITE_API_URL + `/api/track/${domain}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       tracked.value = tracked.value.filter((item) => item.domain !== domain);
       Swal.fire("Deleted!", `${domain} has been untracked.`, "success");
@@ -410,13 +394,6 @@ function searchFromHistory(domain) {
   <div v-if="user" class="app-wrapper">
     <AppHeader />
 
-    <!-- Logout button -->
-    <div class="logout-wrapper">
-      <button @click="logout" class="logout-btn">
-        <i class="fas fa-sign-out-alt" style="margin-right: 6px"></i>Logout
-      </button>
-    </div>
-
     <Form @search="handleSearch" />
 
     <div class="main-container">
@@ -430,7 +407,7 @@ function searchFromHistory(domain) {
     </div>
 
     <!-- Track Expiry Button Centered -->
-    <div class="track-button-wrapper">
+    <div v-show="searchResult" class="track-button-wrapper">
       <button @click="trackResult" class="track-expiry-button">
         Track Domain Expiry
       </button>
@@ -455,40 +432,8 @@ function searchFromHistory(domain) {
 </template>
 
 <style scoped>
-.logout-btn {
-  background-color: #f87171; /* Red-400 */
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.logout-btn:hover {
-  background-color: #ef4444; /* Red-500 */
-}
-
 .app-wrapper {
   position: relative;
-  padding: 20px;
-}
-
-.logout-wrapper {
-  position: absolute;
-  top: 50px;
-  right: 30px;
-}
-
-.main-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 30px;
 }
 
 .track-button-wrapper {
@@ -537,7 +482,7 @@ function searchFromHistory(domain) {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: stretch;
   flex-wrap: wrap;
   gap: 20px;
   margin-top: 30px;

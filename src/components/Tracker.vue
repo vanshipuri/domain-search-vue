@@ -89,9 +89,9 @@ function formatDate(dateString) {
             </td>
 
             <td>
-              <button class="btn notify" @click="emit('manualNotify', item)">
+              <!-- <button class="btn notify" @click="emit('manualNotify', item)">
                 Notify
-              </button>
+              </button> -->
             </td>
           </tr>
         </tbody>
@@ -282,6 +282,8 @@ td.days-left {
 @media (max-width: 768px) {
   .tracker-wrapper {
     padding: 12px;
+    margin-left: 10px;
+    margin-right: 10px;
   }
 
   .tracker-title {

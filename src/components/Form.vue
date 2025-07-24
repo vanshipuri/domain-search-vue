@@ -43,7 +43,8 @@ async function onSubmit() {
         autofocus
       />
       <button class="submit" type="submit">
-        <i class="fa-brands fa-searchengin"></i> Search
+        <i class="fa-brands fa-searchengin"></i>
+        <span class="search-text">Search</span>
       </button>
     </form>
   </section>
@@ -55,6 +56,7 @@ async function onSubmit() {
   gap: 1rem;
   justify-content: center;
   margin: 2rem 0;
+  padding: 0 2rem;
 }
 
 .search-input {
@@ -83,6 +85,12 @@ async function onSubmit() {
   background-color: #4338ca;
 }
 
+@media (max-width: 639px) {
+  .search-text {
+    display: none;
+  }
+}
+
 /*.form-container {
   display: flex;
   align-items: center;
@@ -93,18 +101,12 @@ async function onSubmit() {
 }*/
 .form {
   display: flex;
-  flex-direction: column;
   gap: 12px;
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
   width: 100%;
   max-width: 500px;
-}
-
-@media (min-width: 640px) {
-  .form {
-    flex-direction: row;
-    justify-content: center;
-  }
 }
 
 input[type="text"] {
@@ -134,8 +136,7 @@ input[type="text"]:focus {
     align-items: center;
   }
 
-  .search-input,
-  .submit {
+  .search-input {
     width: 100%;
     max-width: 300px;
     text-align: center;

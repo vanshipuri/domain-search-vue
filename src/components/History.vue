@@ -2,14 +2,13 @@
 const props = defineProps({
   history: Array,
 });
-const emit = defineEmits(['searchFromHistory']);
-
+const emit = defineEmits(["searchFromHistory"]);
 </script>
 
 <template>
   <div class="history-container">
     <h3 class="history-heading">
-      <i class="fas fa-clock" style="margin-right: 6px;"></i>
+      <i class="fas fa-clock" style="margin-right: 6px"></i>
       Previous Searches
     </h3>
 
@@ -27,7 +26,6 @@ const emit = defineEmits(['searchFromHistory']);
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .history-container {
@@ -48,14 +46,14 @@ const emit = defineEmits(['searchFromHistory']);
 
 .history-heading {
   text-align: center;
-  color: #4338ca; 
+  color: #4338ca;
   font-size: 1.4rem;
   font-weight: 600;
   margin-bottom: 20px;
 }
 
 .history-item.active {
-  background-color: #c7d2fe; 
+  background-color: #c7d2fe;
   color: #1e1b4b;
   font-weight: 600;
 }
@@ -112,6 +110,7 @@ hr {
 @media (max-width: 500px) {
   .history-container {
     padding: 16px;
+    margin: 0 auto;
   }
 
   .history-heading {
@@ -124,4 +123,3 @@ hr {
   }
 }
 </style>
-

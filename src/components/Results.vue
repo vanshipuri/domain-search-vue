@@ -1,23 +1,21 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits } from "vue";
 const props = defineProps({
   isLoading: Boolean,
   searchError: String,
   searchResult: Object,
 });
-const emit = defineEmits(['track']);
+const emit = defineEmits(["track"]);
 </script>
 
 <template>
   <div class="results-container">
-    
-
     <div class="results-box">
-     <h3 class="title">
-  <i class="fa-brands fa-searchengin icon"></i>
-  Search Results
-</h3>
-<div v-if="isLoading" class="loader-container">
+      <h3 class="title">
+        <i class="fa-brands fa-searchengin icon"></i>
+        <span>Search Results</span>
+      </h3>
+      <div v-if="isLoading" class="loader-container">
         <div class="loadingio-eclipse">
           <div class="ldio-rpinwye8j0b"><div></div></div>
         </div>
@@ -28,52 +26,67 @@ const emit = defineEmits(['track']);
       </div>
 
       <div v-else-if="searchResult?.WhoisRecord?.domainName" class="info-block">
-  <p>
-    <strong>Domain Name:</strong><br />
-    {{ searchResult.WhoisRecord.domainName }}<br /><br />
-
-    <strong>Name Servers:</strong><br />
-    {{ searchResult.WhoisRecord.nameServers?.hostNames?.join(', ') || searchResult.WhoisRecord.registryData?.hostNames?.join(', ') || 'N/A' }}<br /><br />
-
-    <strong>Registered On:</strong><br />
-    {{ searchResult.WhoisRecord.createdDate || searchResult.WhoisRecord.registryData?.audit?.createdDate || 'N/A' }}<br /><br />
-
-    <strong>Expires On:</strong><br />
-    {{ searchResult.WhoisRecord.expiresDate || searchResult.WhoisRecord.registryData?.expiresDate || 'N/A' }}<br /><br />
-
-    <strong>Updated On:</strong><br />
-    {{ searchResult.WhoisRecord.updatedDate || searchResult.WhoisRecord.registryData?.audit?.updatedDate || 'N/A' }}<br /><br />
-
-    <strong>Data Error:</strong><br />
-    {{ searchResult.WhoisRecord.dataError || 'N/A' }}
-  </p>
-</div>
-
-<!-- Handle data errors -->
-<div v-else-if="searchResult?.WhoisRecord?.dataError" class="info-block">
-  <p v-if="searchResult.WhoisRecord.dataError === 'NO_DATA'">
-    This domain does not exist.
-  </p>
-  <p v-else-if="searchResult.WhoisRecord.dataError === 'INCOMPLETE_DATA'">
-    This domain is registered, but the WHOIS data is incomplete.
-  </p>
-  <p v-else-if="searchResult.WhoisRecord.dataError === 'MASKED_WHOIS_DATA'">
-    The WHOIS data for this domain is masked or private.
-  </p>
-  <p v-else>
-    Unknown WHOIS error: {{ searchResult.WhoisRecord.dataError }}
-  </p>
-</div>
-
-
-      <div v-else class="info-block">
         <p>
-          Eg:<br />
-          <strong>Domain:</strong> ABC.COM<br />
-          <strong>Server:</strong> ns1.abc.com<br />
-          <strong>Registered On:</strong> 1996-05-22T04:00:00Z<br />
-          <strong>Expires On:</strong> 2026-05-23T04:00:00Z
+          <strong>Domain Name:</strong><br />
+          {{ searchResult.WhoisRecord.domainName }}<br /><br />
+
+          <strong>Name Servers:</strong><br />
+          {{
+            searchResult.WhoisRecord.nameServers?.hostNames?.join(", ") ||
+            searchResult.WhoisRecord.registryData?.hostNames?.join(", ") ||
+            "N/A"
+          }}<br /><br />
+
+          <strong>Registered On:</strong><br />
+          {{
+            searchResult.WhoisRecord.createdDate ||
+            searchResult.WhoisRecord.registryData?.audit?.createdDate ||
+            "N/A"
+          }}<br /><br />
+
+          <strong>Expires On:</strong><br />
+          {{
+            searchResult.WhoisRecord.expiresDate ||
+            searchResult.WhoisRecord.registryData?.expiresDate ||
+            "N/A"
+          }}<br /><br />
+
+          <strong>Updated On:</strong><br />
+          {{
+            searchResult.WhoisRecord.updatedDate ||
+            searchResult.WhoisRecord.registryData?.audit?.updatedDate ||
+            "N/A"
+          }}<br /><br />
+
+          <strong>Data Error:</strong><br />
+          {{ searchResult.WhoisRecord.dataError || "N/A" }}
         </p>
+      </div>
+
+      <!-- Handle data errors -->
+      <div v-else-if="searchResult?.WhoisRecord?.dataError" class="info-block">
+        <p v-if="searchResult.WhoisRecord.dataError === 'NO_DATA'">
+          This domain does not exist.
+        </p>
+        <p v-else-if="searchResult.WhoisRecord.dataError === 'INCOMPLETE_DATA'">
+          This domain is registered, but the WHOIS data is incomplete.
+        </p>
+        <p
+          v-else-if="searchResult.WhoisRecord.dataError === 'MASKED_WHOIS_DATA'"
+        >
+          The WHOIS data for this domain is masked or private.
+        </p>
+        <p v-else>
+          Unknown WHOIS error: {{ searchResult.WhoisRecord.dataError }}
+        </p>
+      </div>
+
+      <div
+        v-else
+        class="info-block"
+        style="color: #6b7280; align-self: center; text-align: center"
+      >
+        <p>Enter a domain name above to begin.</p>
       </div>
     </div>
   </div>
@@ -90,12 +103,13 @@ const emit = defineEmits(['track']);
 
 .title {
   text-align: center;
-  color:  #4338ca;
-   display: flex;
+  color: #4338ca;
+  display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: nowrap;
   gap: 10px;
-  color: #4338ca; 
+  color: #4338ca;
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 24px;
@@ -131,8 +145,8 @@ const emit = defineEmits(['track']);
   transition: box-shadow 0.3s ease-in-out, transform 0.3s;
 }
 
-.results-box:hover { 
-   box-shadow: 0 10px 25px rgba(67, 56, 202, 0.15);
+.results-box:hover {
+  box-shadow: 0 10px 25px rgba(67, 56, 202, 0.15);
   transform: translateY(-3px);
 }
 
@@ -151,9 +165,15 @@ const emit = defineEmits(['track']);
 
 /* Loader Animation */
 @keyframes ldio-rpinwye8j0b {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(180deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 .ldio-rpinwye8j0b div {
   position: absolute;
@@ -179,12 +199,14 @@ const emit = defineEmits(['track']);
   transform: translateZ(0) scale(1);
   backface-visibility: hidden;
 }
-.ldio-rpinwye8j0b div { box-sizing: content-box; }
+.ldio-rpinwye8j0b div {
+  box-sizing: content-box;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .results-container {
-    padding: 16px;
+    padding: 0;
   }
 
   .results-box {
@@ -205,7 +227,6 @@ const emit = defineEmits(['track']);
 @media (max-width: 480px) {
   .title {
     font-size: 1.2rem;
-    flex-direction: column;
     gap: 4px;
   }
 
