@@ -1,5 +1,5 @@
 {
-  "appId": "biz.akaal.vanshi-domain-tracker",
+  "appId": "biz.akaal.vanshidomaintracker",
   "appName": "Domain Tracker",
   "webDir": "dist",
   "bundleWebRuntime": false

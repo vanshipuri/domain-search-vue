@@ -1,4 +1,4 @@
-package biz.akaal.vanshi-domain-tracker;
+package biz.akaal.vanshidomaintracker;
 
 import com.getcapacitor.BridgeActivity;
 
